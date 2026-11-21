@@ -28,7 +28,7 @@ function writeJson(key, value) {
 
 export default function App() {
   const [session, setSession] = useState(() => getSavedSession());
-  const [theme, setTheme] = useState(() => readJson('theme', 'light'));
+  const [theme, setTheme] = useState(() => readJson('theme:v2', 'dark'));
   const [fontSize, setFontSize] = useState(() => readJson('fontSize', 14));
   const [problems, setProblems] = useState([]);
   const [activeProblemId, setActiveProblemId] = useState(null);
@@ -63,7 +63,7 @@ export default function App() {
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
-    writeJson('theme', theme);
+    writeJson('theme:v2', theme);
   }, [theme]);
 
   useEffect(() => {

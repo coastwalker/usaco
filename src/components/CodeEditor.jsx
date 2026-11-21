@@ -44,6 +44,34 @@ const lightEditorTheme = EditorView.theme({
   },
 });
 
+const darkEditorTheme = [
+  oneDark,
+  EditorView.theme(
+    {
+      '&': {
+        backgroundColor: '#121821',
+        color: '#e6edf5',
+      },
+      '.cm-gutters': {
+        backgroundColor: '#0e131b',
+        color: '#64748b',
+        borderRight: '1px solid #222c3c',
+      },
+      '.cm-activeLineGutter': {
+        backgroundColor: '#1a2230',
+        color: '#cbd5e1',
+      },
+      '.cm-activeLine': {
+        backgroundColor: 'rgba(59, 130, 246, 0.08)',
+      },
+      '.cm-cursor': {
+        borderLeftColor: '#60a5fa',
+      },
+    },
+    { dark: true }
+  ),
+];
+
 export default function CodeEditor({
   language,
   onLanguageChange,
@@ -96,7 +124,7 @@ export default function CodeEditor({
         indentUnit.of('    '),
         runShortcut,
         langCompartment.current.of(getLanguageExtension(language)),
-        themeCompartment.current.of(theme === 'dark' ? oneDark : lightEditorTheme),
+        themeCompartment.current.of(theme === 'dark' ? darkEditorTheme : lightEditorTheme),
         fontCompartment.current.of(
           EditorView.theme({
             '&': { fontSize: `${fontSize}px` },
@@ -149,7 +177,7 @@ export default function CodeEditor({
     if (!view) return;
     view.dispatch({
       effects: themeCompartment.current.reconfigure(
-        theme === 'dark' ? oneDark : lightEditorTheme
+        theme === 'dark' ? darkEditorTheme : lightEditorTheme
       ),
     });
   }, [theme]);
