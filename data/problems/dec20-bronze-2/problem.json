@@ -1,0 +1,73 @@
+{
+  "id": "dec20-bronze-2",
+  "order": 6,
+  "cpid": 1060,
+  "contest": "USACO 2020 December Contest",
+  "division": "Bronze",
+  "number": 2,
+  "title": "Daisy Chains",
+  "difficulty": "Easy",
+  "sourceUrl": "https://usaco.org/index.php?page=viewproblem2&cpid=1060",
+  "resultsUrl": "https://usaco.org/index.php?page=dec20results",
+  "editorialUrl": "https://usaco.org/current/data/sol_prob2_bronze_dec20.html",
+  "guideModule": "Basic Complete Search",
+  "guideUrl": "https://usaco.guide/bronze/intro-complete",
+  "credits": "Nick Wu",
+  "limits": {
+    "timeLimitCppMs": 2000,
+    "timeLimitPythonMs": 4000,
+    "timeLimitJavaMs": 4000,
+    "memoryLimitMb": 256
+  },
+  "tags": ["Complete Search", "Subarrays", "Math"],
+  "statement": {
+    "paragraphs": [
+      "Every day, as part of her walk around the farm, Bessie the cow visits her favorite pasture, which has N flowers (all colorful daisies) labeled 1…N lined up in a row (1 ≤ N ≤ 100). Flower i has pᵢ petals (1 ≤ pᵢ ≤ 1000).",
+      "As a budding photographer, Bessie decides to take several photos of these flowers. In particular, for every pair of flowers (i, j) satisfying 1 ≤ i ≤ j ≤ N, Bessie takes a photo of all flowers from flower i to flower j (including i and j).",
+      "Bessie later looks at these photos and notices that some of these photos have an \"average flower\" — a flower that has P petals, where P is the exact average number of petals among all flowers in the photo.",
+      "How many of Bessie's photos have an average flower?"
+    ],
+    "inputFormat": [
+      "The first line of input contains N.",
+      "The second line contains N space-separated integers p₁ … pₙ."
+    ],
+    "outputFormat": [
+      "Please print out the number of photos that have an average flower."
+    ],
+    "sampleInput": "4\n1 1 2 3",
+    "sampleOutput": "6",
+    "sampleExplanation": [
+      {
+        "title": "Sample Analysis",
+        "detail": "Every single-flower photo (4 of them) trivially has an average flower. Among multi-flower ranges, (1, 2) has petals [1, 1] with average 1, and (2, 4) has petals [1, 2, 3] with average 2 (matching flower 3).",
+        "steps": "Valid (i, j): (1,1), (2,2), (3,3), (4,4), (1,2), (2,4)  →  6 photos"
+      }
+    ]
+  },
+  "hints": [
+    {
+      "level": 1,
+      "title": "Small Constraints Allow Complete Search",
+      "body": "Since N ≤ 100, there are at most N(N + 1)/2 ≈ 5,050 photos (i, j). Even an O(N³) algorithm checks at most ~500,000 elements, which is tiny!"
+    },
+    {
+      "level": 2,
+      "title": "Avoid Floating-Point Precision Bugs",
+      "body": "Instead of computing average = sum / len as a float, check divisibility with integers! Flower k in [i..j] equals the exact average if and only if p[k] * (j − i + 1) == totalSum."
+    }
+  ],
+  "editorial": {
+    "summary": "Enumerate every subarray [i..j], compute its sum S and length L = j − i + 1, and check if any element p[k] in [i..j] satisfies p[k] · L == S using exact integer arithmetic.",
+    "complexity": "Time: O(N³) or O(N²)  |  Space: O(N)",
+    "solutions": {
+      "python": "import sys\n\ndef solve():\n    data = list(map(int, sys.stdin.read().split()))\n    n = data[0]\n    p = data[1:1 + n]\n    ans = 0\n    for i in range(n):\n        total = 0\n        seen = set()\n        for j in range(i, n):\n            total += p[j]\n            seen.add(p[j])\n            length = j - i + 1\n            if total % length == 0 and (total // length) in seen:\n                ans += 1\n    print(ans)\n\nif __name__ == \"__main__\":\n    solve()\n",
+      "cpp": "#include <iostream>\n#include <vector>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    vector<int> p(n);\n    for (int i = 0; i < n; i++) cin >> p[i];\n    int ans = 0;\n    for (int i = 0; i < n; i++) {\n        int sum = 0;\n        for (int j = i; j < n; j++) {\n            sum += p[j];\n            int len = j - i + 1;\n            for (int k = i; k <= j; k++) {\n                if (p[k] * len == sum) {\n                    ans++;\n                    break;\n                }\n            }\n        }\n    }\n    cout << ans << '\\n';\n    return 0;\n}\n",
+      "java": "import java.io.*;\nimport java.util.*;\n\npublic class Main {\n    public static void main(String[] args) throws Exception {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        int[] p = new int[n];\n        for (int i = 0; i < n; i++) p[i] = sc.nextInt();\n        int ans = 0;\n        for (int i = 0; i < n; i++) {\n            int sum = 0;\n            for (int j = i; j < n; j++) {\n                sum += p[j];\n                int len = j - i + 1;\n                for (int k = i; k <= j; k++) {\n                    if (p[k] * len == sum) {\n                        ans++;\n                        break;\n                    }\n                }\n            }\n        }\n        System.out.println(ans);\n    }\n}\n"
+    }
+  },
+  "starterCode": {
+    "python": "import sys\n\ndef solve():\n    data = list(map(int, sys.stdin.read().split()))\n    if not data:\n        return\n    n = data[0]\n    p = data[1:1 + n]\n    \n    # Write your solution here\n    print(0)\n\nif __name__ == \"__main__\":\n    solve()\n",
+    "cpp": "#include <iostream>\n#include <vector>\nusing namespace std;\n\nint main() {\n    int n;\n    if (!(cin >> n)) return 0;\n    vector<int> p(n);\n    for (int i = 0; i < n; i++) cin >> p[i];\n    \n    // Write your solution here\n    cout << 0 << '\\n';\n    return 0;\n}\n",
+    "java": "import java.io.*;\nimport java.util.*;\n\npublic class Main {\n    public static void main(String[] args) throws Exception {\n        Scanner sc = new Scanner(System.in);\n        if (!sc.hasNextInt()) return;\n        int n = sc.nextInt();\n        int[] p = new int[n];\n        for (int i = 0; i < n; i++) p[i] = sc.nextInt();\n        \n        // Write your solution here\n        System.out.println(0);\n    }\n}\n"
+  }
+}

@@ -1,0 +1,86 @@
+{
+  "id": "jan22-bronze-1",
+  "order": 4,
+  "cpid": 1179,
+  "contest": "USACO 2022 January Contest",
+  "division": "Bronze",
+  "number": 1,
+  "title": "Herdle",
+  "difficulty": "Easy",
+  "sourceUrl": "https://usaco.org/index.php?page=viewproblem2&cpid=1179",
+  "resultsUrl": "https://usaco.org/index.php?page=jan22results",
+  "editorialUrl": "https://usaco.org/current/data/sol_prob1_bronze_jan22.html",
+  "guideModule": "Simulation",
+  "guideUrl": "https://usaco.guide/bronze/simulation",
+  "credits": "Brian Dean",
+  "limits": {
+    "timeLimitCppMs": 2000,
+    "timeLimitPythonMs": 4000,
+    "timeLimitJavaMs": 4000,
+    "memoryLimitMb": 256
+  },
+  "tags": ["Simulation", "Frequency Array", "Grid"],
+  "statement": {
+    "paragraphs": [
+      "The cows have created a new type of puzzle called Herdle that has become a viral sensation in the bovine world.",
+      "Each day, a new puzzle is released for the cows to solve. The puzzle takes the form of a 3 by 3 grid representing a field on the farm, with each square of the field occupied by a cow of a certain breed. There are only 26 possible breeds, each identified by a different capital letter in the range A through Z. One is not told the pattern of breeds in the field — the goal is to figure them out through a series of guesses.",
+      "In each guess, the cows enter a 3 by 3 grid of uppercase letters indicating a possible way the field could be filled with cows. Some of the squares in the guess might be correct. These are highlighted in green to let the cows know that they are correct. Other squares in the guess might be filled with a cow of the right breed but in the wrong place. These are highlighted in yellow.",
+      "More precisely, if there are x cows of a certain breed in the guess grid and y < x cows of this breed in the answer grid (not counting cows in the right place that lead to green highlights), then only y of the x cows in the guess grid should be highlighted yellow.",
+      "Given the correct answer grid and a grid representing a guess at this answer, please calculate the number of green and yellow highlighted squares."
+    ],
+    "inputFormat": [
+      "The first 3 lines of input give the 3×3 grid representing the correct answer.",
+      "The next 3 lines of input represent a 3×3 guess of this answer."
+    ],
+    "outputFormat": [
+      "Print two lines of output. On the first line, print the number of squares that should be highlighted in green. On the second line, print the number of squares that should be highlighted in yellow."
+    ],
+    "sampleInput": "COW\nSAY\nMOO\nWIN\nTHE\nIOI",
+    "sampleOutput": "1\n1",
+    "additionalSamples": [
+      {
+        "input": "AAA\nBBB\nCCC\nAYY\nAAA\nZZZ",
+        "output": "1\n2",
+        "explanation": "One of the As (top-left) is in the right place, giving 1 green. Of the remaining As, 2 remain in the answer grid and 3 appear in the guess grid, so min(2, 3) = 2 are highlighted yellow."
+      }
+    ],
+    "sampleExplanation": [
+      {
+        "title": "Sample 1 Analysis",
+        "detail": "The middle O in the bottom row matches in both answer (MOO) and guess (IOI), giving 1 green. The letter W appears once in the answer and once in the guess at different positions, giving 1 yellow.",
+        "steps": "Green: (row 3, col 2) = 'O'  |  Yellow: 'W'"
+      }
+    ]
+  },
+  "hints": [
+    {
+      "level": 1,
+      "title": "Count Green Matches First",
+      "body": "Loop over all 9 cells (r, c). Whenever answer[r][c] == guess[r][c], increment green! Remember that green cells are \"used up\" and must NOT contribute to yellow."
+    },
+    {
+      "level": 2,
+      "title": "Frequency Counts for Non-Green Cells",
+      "body": "For every cell (r, c) where answer[r][c] != guess[r][c], increment ansFreq[answer[r][c]] and guessFreq[guess[r][c]] across the 26 uppercase letters 'A'..'Z'."
+    },
+    {
+      "level": 3,
+      "title": "Compute Yellow per Breed",
+      "body": "For each breed L from 'A' to 'Z', how many non-green guesses of breed L can be matched with remaining non-green answer cells of breed L? Exactly min(ansFreq[L], guessFreq[L])! Sum this over all 26 letters."
+    }
+  ],
+  "editorial": {
+    "summary": "Compare each of the 9 positions: if answer[i] == guess[i], increment green; otherwise, record the character counts in two 26-letter frequency arrays. Finally, add min(ansCount[c], guessCount[c]) over all 26 letters to obtain yellow.",
+    "complexity": "Time: O(1) (9 grid cells + 26 letters)  |  Space: O(1)",
+    "solutions": {
+      "python": "import sys\n\ndef solve():\n    lines = [line.strip() for line in sys.stdin.read().splitlines() if line.strip()]\n    ans = \"\".join(lines[:3])\n    guess = \"\".join(lines[3:6])\n    green = 0\n    ans_cnt = [0] * 26\n    guess_cnt = [0] * 26\n    for a, g in zip(ans, guess):\n        if a == g:\n            green += 1\n        else:\n            ans_cnt[ord(a) - 65] += 1\n            guess_cnt[ord(g) - 65] += 1\n    yellow = sum(min(x, y) for x, y in zip(ans_cnt, guess_cnt))\n    print(green)\n    print(yellow)\n\nif __name__ == \"__main__\":\n    solve()\n",
+      "cpp": "#include <algorithm>\n#include <iostream>\n#include <string>\nusing namespace std;\n\nint main() {\n    string ans, guess, row;\n    for (int i = 0; i < 3; i++) { cin >> row; ans += row; }\n    for (int i = 0; i < 3; i++) { cin >> row; guess += row; }\n    int green = 0, ansCnt[26] = {}, guessCnt[26] = {};\n    for (int i = 0; i < 9; i++) {\n        if (ans[i] == guess[i]) {\n            green++;\n        } else {\n            ansCnt[ans[i] - 'A']++;\n            guessCnt[guess[i] - 'A']++;\n        }\n    }\n    int yellow = 0;\n    for (int c = 0; c < 26; c++) yellow += min(ansCnt[c], guessCnt[c]);\n    cout << green << '\\n' << yellow << '\\n';\n    return 0;\n}\n",
+      "java": "import java.io.*;\nimport java.util.*;\n\npublic class Main {\n    public static void main(String[] args) throws Exception {\n        Scanner sc = new Scanner(System.in);\n        StringBuilder ans = new StringBuilder();\n        StringBuilder guess = new StringBuilder();\n        for (int i = 0; i < 3; i++) ans.append(sc.next());\n        for (int i = 0; i < 3; i++) guess.append(sc.next());\n        int green = 0;\n        int[] ansCnt = new int[26];\n        int[] guessCnt = new int[26];\n        for (int i = 0; i < 9; i++) {\n            char a = ans.charAt(i), g = guess.charAt(i);\n            if (a == g) green++;\n            else {\n                ansCnt[a - 'A']++;\n                guessCnt[g - 'A']++;\n            }\n        }\n        int yellow = 0;\n        for (int c = 0; c < 26; c++) yellow += Math.min(ansCnt[c], guessCnt[c]);\n        System.out.println(green);\n        System.out.println(yellow);\n    }\n}\n"
+    }
+  },
+  "starterCode": {
+    "python": "import sys\n\ndef solve():\n    lines = [line.strip() for line in sys.stdin.read().splitlines() if line.strip()]\n    if len(lines) < 6:\n        return\n    ans = lines[:3]\n    guess = lines[3:6]\n    \n    # Write your solution here: print green on line 1, yellow on line 2\n    print(0)\n    print(0)\n\nif __name__ == \"__main__\":\n    solve()\n",
+    "cpp": "#include <iostream>\n#include <string>\n#include <vector>\nusing namespace std;\n\nint main() {\n    vector<string> ans(3), guess(3);\n    for (int i = 0; i < 3; i++) if (!(cin >> ans[i])) return 0;\n    for (int i = 0; i < 3; i++) cin >> guess[i];\n    \n    // Write your solution here\n    cout << 0 << '\\n' << 0 << '\\n';\n    return 0;\n}\n",
+    "java": "import java.io.*;\nimport java.util.*;\n\npublic class Main {\n    public static void main(String[] args) throws Exception {\n        Scanner sc = new Scanner(System.in);\n        if (!sc.hasNext()) return;\n        String[] ans = new String[3];\n        String[] guess = new String[3];\n        for (int i = 0; i < 3; i++) ans[i] = sc.next();\n        for (int i = 0; i < 3; i++) guess[i] = sc.next();\n        \n        // Write your solution here\n        System.out.println(0);\n        System.out.println(0);\n    }\n}\n"
+  }
+}

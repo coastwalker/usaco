@@ -1,0 +1,79 @@
+{
+  "id": "jan23-bronze-2",
+  "order": 11,
+  "cpid": 1276,
+  "contest": "USACO 2023 January Contest",
+  "division": "Bronze",
+  "number": 2,
+  "title": "Air Cownditioning II",
+  "difficulty": "Hard",
+  "sourceUrl": "https://usaco.org/index.php?page=viewproblem2&cpid=1276",
+  "resultsUrl": "https://usaco.org/index.php?page=jan23results",
+  "editorialUrl": "https://usaco.org/current/data/sol_prob2_bronze_jan23.html",
+  "guideModule": "Complete Search with Recursion",
+  "guideUrl": "https://usaco.guide/bronze/complete-rec",
+  "credits": "Aryansh Shrivastava and Eric Hsu",
+  "limits": {
+    "timeLimitCppMs": 2000,
+    "timeLimitPythonMs": 4000,
+    "timeLimitJavaMs": 4000,
+    "memoryLimitMb": 256
+  },
+  "tags": ["Complete Search", "Recursion", "Bitmasks"],
+  "statement": {
+    "paragraphs": [
+      "With the hottest recorded summer ever at Farmer John's farm, he needs a way to cool down his cows. Thus, he decides to invest in some air conditioners.",
+      "Farmer John's N cows (1 ≤ N ≤ 20) live in a barn that contains a sequence of stalls in a row, numbered 1…100. Cow i occupies a range of these stalls, starting from stall sᵢ and ending with stall tᵢ. The ranges of stalls occupied by different cows are all disjoint from each other. Cow i must be cooled by an amount cᵢ, meaning every stall occupied by cow i must have its temperature reduced by at least cᵢ units.",
+      "The barn contains M air conditioners, labeled 1…M (1 ≤ M ≤ 10). The i-th air conditioner costs mᵢ units of money to operate (1 ≤ mᵢ ≤ 1000) and cools the range of stalls starting from stall aᵢ and ending with stall bᵢ. If running, the i-th air conditioner reduces the temperature of all the stalls in this range by pᵢ (1 ≤ pᵢ ≤ 10⁶). Ranges of stalls covered by air conditioners may potentially overlap.",
+      "Please determine the minimum amount of money FJ needs to spend to keep all of his cows comfortable. It is guaranteed that if FJ uses all of his conditioners, then all cows will be comfortable."
+    ],
+    "inputFormat": [
+      "The first line of input contains N and M.",
+      "The next N lines describe cows. The i-th of these lines contains sᵢ, tᵢ, and cᵢ.",
+      "The next M lines describe air conditioners. The i-th of these lines contains aᵢ, bᵢ, pᵢ, and mᵢ."
+    ],
+    "outputFormat": [
+      "Output a single integer telling the minimum amount of money FJ needs to spend to operate enough air conditioners to satisfy all his cows."
+    ],
+    "sampleInput": "2 4\n1 5 2\n7 9 3\n2 9 2 3\n1 6 2 8\n1 2 4 2\n6 9 1 5",
+    "sampleOutput": "10",
+    "sampleExplanation": [
+      {
+        "title": "Sample Analysis",
+        "detail": "Selecting air conditioners 1 ([2..9], cool 2, cost 3), 3 ([1..2], cool 4, cost 2), and 4 ([6..9], cool 1, cost 5) cools stalls [1..5] by ≥ 2 and stalls [7..9] by 2 + 1 = 3 for a minimum total cost of 3 + 2 + 5 = 10.",
+        "steps": "AC #1 (cost 3) + AC #3 (cost 2) + AC #4 (cost 5) = 10"
+      }
+    ]
+  },
+  "hints": [
+    {
+      "level": 1,
+      "title": "Notice M ≤ 10!",
+      "body": "Each of the M air conditioners is either ON or OFF. With M ≤ 10, how many subsets of air conditioners exist? Only 2¹⁰ = 1,024 subsets!"
+    },
+    {
+      "level": 2,
+      "title": "Generate Subsets via Recursion or Bitmasks",
+      "body": "You can either write a recursive function dfs(idx) that branches on skipping or taking AC idx, OR loop mask from 0 to (1 << M) − 1 where bit i tells whether AC i is turned on."
+    },
+    {
+      "level": 3,
+      "title": "Validate Stalls 1..100",
+      "body": "Precompute required[1..100] from the N cows. For each subset of air conditioners, accumulate cool[1..100] and cost; if cool[x] ≥ required[x] for all x = 1..100, update ans = min(ans, cost)!"
+    }
+  ],
+  "editorial": {
+    "summary": "Since M ≤ 10, there are at most 2¹⁰ = 1024 subsets of air conditioners. Enumerate every subset (via recursion or bitmask), compute the cooling on stalls 1..100, and take the minimum cost among subsets that satisfy every stall's cooling requirement.",
+    "complexity": "Time: O(2ᴹ · (M · 100)) ≈ 10⁵ ops  |  Space: O(100)",
+    "solutions": {
+      "python": "import sys\n\ndef solve():\n    data = list(map(int, sys.stdin.read().split()))\n    idx = 0\n    n, m = data[idx], data[idx + 1]\n    idx += 2\n    req = [0] * 101\n    for _ in range(n):\n        s, t, c = data[idx], data[idx + 1], data[idx + 2]\n        idx += 3\n        for pos in range(s, t + 1):\n            req[pos] = c\n    acs = []\n    for _ in range(m):\n        a, b, p, cost = data[idx], data[idx + 1], data[idx + 2], data[idx + 3]\n        idx += 4\n        acs.append((a, b, p, cost))\n\n    ans = float('inf')\n    for mask in range(1 << m):\n        cool = [0] * 101\n        cost = 0\n        for i in range(m):\n            if (mask >> i) & 1:\n                a, b, p, mc = acs[i]\n                cost += mc\n                for pos in range(a, b + 1):\n                    cool[pos] += p\n        if cost < ans and all(cool[pos] >= req[pos] for pos in range(1, 101)):\n            ans = cost\n    print(ans)\n\nif __name__ == \"__main__\":\n    solve()\n",
+      "cpp": "#include <algorithm>\n#include <climits>\n#include <iostream>\n#include <vector>\nusing namespace std;\n\nstruct AC {\n    int a, b, p, m;\n};\n\nint main() {\n    int n, m;\n    cin >> n >> m;\n    vector<int> req(101, 0);\n    for (int i = 0; i < n; i++) {\n        int s, t, c;\n        cin >> s >> t >> c;\n        for (int x = s; x <= t; x++) req[x] = c;\n    }\n    vector<AC> acs(m);\n    for (int i = 0; i < m; i++) {\n        cin >> acs[i].a >> acs[i].b >> acs[i].p >> acs[i].m;\n    }\n    int ans = INT_MAX;\n    for (int mask = 0; mask < (1 << m); mask++) {\n        int cool[101] = {};\n        int cost = 0;\n        for (int i = 0; i < m; i++) {\n            if ((mask >> i) & 1) {\n                cost += acs[i].m;\n                for (int x = acs[i].a; x <= acs[i].b; x++) cool[x] += acs[i].p;\n            }\n        }\n        bool ok = true;\n        for (int x = 1; x <= 100; x++) {\n            if (cool[x] < req[x]) { ok = false; break; }\n        }\n        if (ok) ans = min(ans, cost);\n    }\n    cout << ans << '\\n';\n    return 0;\n}\n",
+      "java": "import java.io.*;\nimport java.util.*;\n\npublic class Main {\n    public static void main(String[] args) throws Exception {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt(), m = sc.nextInt();\n        int[] req = new int[101];\n        for (int i = 0; i < n; i++) {\n            int s = sc.nextInt(), t = sc.nextInt(), c = sc.nextInt();\n            for (int x = s; x <= t; x++) req[x] = c;\n        }\n        int[] a = new int[m], b = new int[m], p = new int[m], costArr = new int[m];\n        for (int i = 0; i < m; i++) {\n            a[i] = sc.nextInt();\n            b[i] = sc.nextInt();\n            p[i] = sc.nextInt();\n            costArr[i] = sc.nextInt();\n        }\n        int ans = Integer.MAX_VALUE;\n        for (int mask = 0; mask < (1 << m); mask++) {\n            int[] cool = new int[101];\n            int cost = 0;\n            for (int i = 0; i < m; i++) {\n                if (((mask >> i) & 1) == 1) {\n                    cost += costArr[i];\n                    for (int x = a[i]; x <= b[i]; x++) cool[x] += p[i];\n                }\n            }\n            boolean ok = true;\n            for (int x = 1; x <= 100; x++) {\n                if (cool[x] < req[x]) { ok = false; break; }\n            }\n            if (ok) ans = Math.min(ans, cost);\n        }\n        System.out.println(ans);\n    }\n}\n"
+    }
+  },
+  "starterCode": {
+    "python": "import sys\n\ndef solve():\n    data = list(map(int, sys.stdin.read().split()))\n    if not data:\n        return\n    idx = 0\n    n, m = data[idx], data[idx + 1]\n    idx += 2\n    cows = []\n    for _ in range(n):\n        cows.append((data[idx], data[idx + 1], data[idx + 2]))\n        idx += 3\n    acs = []\n    for _ in range(m):\n        acs.append((data[idx], data[idx + 1], data[idx + 2], data[idx + 3]))\n        idx += 4\n    \n    # Write your solution here\n    print(0)\n\nif __name__ == \"__main__\":\n    solve()\n",
+    "cpp": "#include <iostream>\n#include <vector>\nusing namespace std;\n\nint main() {\n    int n, m;\n    if (!(cin >> n >> m)) return 0;\n    // Read N cows and M air conditioners, then print minimum cost\n    cout << 0 << '\\n';\n    return 0;\n}\n",
+    "java": "import java.io.*;\nimport java.util.*;\n\npublic class Main {\n    public static void main(String[] args) throws Exception {\n        Scanner sc = new Scanner(System.in);\n        if (!sc.hasNextInt()) return;\n        int n = sc.nextInt(), m = sc.nextInt();\n        // Read N cows and M air conditioners, then print minimum cost\n        System.out.println(0);\n    }\n}\n"
+  }
+}

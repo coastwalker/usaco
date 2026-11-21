@@ -2,12 +2,19 @@
 
 A LeetCode & USACO-style online competitive programming practice web app built for USACO preparation.
 
-## Included Problems
+## Included Official USACO Bronze Practice Set (11 Problems · 127 Test Cases)
 
-1. **Sleeping in Class** — USACO 2022 February Contest, Bronze, Problem 1 ([cpid=1203](https://usaco.org/index.php?page=viewproblem2&cpid=1203))
-   - Includes all **11 official USACO test cases** (`1.in`–`11.in`, `1.out`–`11.out`)
-   - Interactive **Class-Period Merge Visualizer** to explore the invariant total sum
-   - Progressive collapsible hints + reference solutions in Python 3, C++17, and Java
+1. **Sleeping in Class** — 2022 Feb Bronze, Problem 1 ([cpid=1203](https://usaco.org/index.php?page=viewproblem2&cpid=1203)) · *Basic Complete Search* · 11 tests + interactive visualizer
+2. **Cow College** — 2022 Dec Bronze, Problem 1 ([cpid=1251](https://usaco.org/index.php?page=viewproblem2&cpid=1251)) · *Introduction to Sorting* · 12 tests
+3. **Do You Know Your ABCs?** — 2020 Dec Bronze, Problem 1 ([cpid=1059](https://usaco.org/index.php?page=viewproblem2&cpid=1059)) · *Introduction to Sorting* · 10 tests
+4. **Herdle** — 2022 Jan Bronze, Problem 1 ([cpid=1179](https://usaco.org/index.php?page=viewproblem2&cpid=1179)) · *Simulation* · 11 tests
+5. **Uddered but not Herd** — 2021 Jan Bronze, Problem 1 ([cpid=1083](https://usaco.org/index.php?page=viewproblem2&cpid=1083)) · *Simulation* · 10 tests
+6. **Daisy Chains** — 2020 Dec Bronze, Problem 2 ([cpid=1060](https://usaco.org/index.php?page=viewproblem2&cpid=1060)) · *Basic Complete Search* · 10 tests
+7. **Counting Liars** — 2022 US Open Bronze, Problem 2 ([cpid=1228](https://usaco.org/index.php?page=viewproblem2&cpid=1228)) · *Basic Complete Search* · 12 tests
+8. **Even More Odd Photos** — 2021 Jan Bronze, Problem 2 ([cpid=1084](https://usaco.org/index.php?page=viewproblem2&cpid=1084)) · *Introduction to Greedy Algorithms* · 11 tests
+9. **Just Stalling** — 2021 Jan Bronze, Problem 3 ([cpid=1085](https://usaco.org/index.php?page=viewproblem2&cpid=1085)) · *Introduction to Sorting* · 12 tests
+10. **Leaders** — 2023 Jan Bronze, Problem 1 ([cpid=1275](https://usaco.org/index.php?page=viewproblem2&cpid=1275)) · *Ad Hoc Problems* · 17 tests
+11. **Air Cownditioning II** — 2023 Jan Bronze, Problem 2 ([cpid=1276](https://usaco.org/index.php?page=viewproblem2&cpid=1276)) · *Complete Search with Recursion* · 11 tests
 
 ## Features
 

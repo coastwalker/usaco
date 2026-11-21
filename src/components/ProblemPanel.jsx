@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   BookOpen,
   Check,
   ChevronDown,
   ChevronRight,
   Copy,
+  ExternalLink,
   Eye,
+  GraduationCap,
   History,
   Lightbulb,
   Sliders,
@@ -23,6 +25,13 @@ export default function ProblemPanel({
   const [copiedKey, setCopiedKey] = useState('');
   const [revealedHints, setRevealedHints] = useState({});
   const [showSolution, setShowSolution] = useState(false);
+
+  // Reset tab and spoilers when switching problems
+  useEffect(() => {
+    setActiveTab('description');
+    setRevealedHints({});
+    setShowSolution(false);
+  }, [problem?.id]);
 
   if (!problem) {
     return (
@@ -114,9 +123,55 @@ export default function ProblemPanel({
                 <span>Problem {problem.number}</span>
                 <span>•</span>
                 <span>{problem.testCount} Official Test Cases</span>
+                {problem.difficulty && (
+                  <span
+                    className={`diff-badge diff-${problem.difficulty.toLowerCase()}`}
+                  >
+                    {problem.difficulty}
+                  </span>
+                )}
               </div>
 
               <h1 className="problem-title">{problem.title}</h1>
+
+              {(problem.guideUrl || problem.resultsUrl || problem.editorialUrl) && (
+                <div className="resource-links-row">
+                  {problem.guideUrl && (
+                    <a
+                      href={problem.guideUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="resource-chip"
+                    >
+                      <GraduationCap size={13} />
+                      <span>USACO Guide: {problem.guideModule || 'Bronze'}</span>
+                      <ExternalLink size={11} />
+                    </a>
+                  )}
+                  {problem.resultsUrl && (
+                    <a
+                      href={problem.resultsUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="resource-chip"
+                    >
+                      <span>Contest Results</span>
+                      <ExternalLink size={11} />
+                    </a>
+                  )}
+                  {problem.editorialUrl && (
+                    <a
+                      href={problem.editorialUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="resource-chip"
+                    >
+                      <span>Official USACO Editorial</span>
+                      <ExternalLink size={11} />
+                    </a>
+                  )}
+                </div>
+              )}
 
               <div className="limits-strip">
                 <span className="limit-chip">
@@ -149,7 +204,9 @@ export default function ProblemPanel({
               <p key={idx}>{para}</p>
             ))}
 
-            <h2 className="section-heading">Sample Test Case</h2>
+            <h2 className="section-heading">
+              {problem.statement.additionalSamples?.length ? 'Sample Test Case 1' : 'Sample Test Case'}
+            </h2>
             <div className="io-grid">
               <div className="io-box">
                 <div className="io-box-header">
@@ -212,6 +269,68 @@ export default function ProblemPanel({
               </>
             )}
 
+            {problem.statement.additionalSamples?.map((extra, sIdx) => (
+              <div key={sIdx} style={{ marginTop: 18 }}>
+                <h2 className="section-heading">Sample Test Case {sIdx + 2}</h2>
+                <div className="io-grid">
+                  <div className="io-box">
+                    <div className="io-box-header">
+                      <span>Sample Input {sIdx + 2}</span>
+                      <div style={{ display: 'flex', gap: 4 }}>
+                        <button
+                          type="button"
+                          className="icon-btn compact"
+                          onClick={() => onUseSampleInput(extra.input, extra.output)}
+                          title="Load sample into Testcase runner"
+                        >
+                          Try
+                        </button>
+                        <button
+                          type="button"
+                          className="icon-btn compact"
+                          onClick={() => copyText(`extra-in-${sIdx}`, extra.input)}
+                          aria-label="Copy sample input"
+                        >
+                          {copiedKey === `extra-in-${sIdx}` ? (
+                            <Check size={13} />
+                          ) : (
+                            <Copy size={13} />
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                    <pre className="io-pre">{extra.input}</pre>
+                  </div>
+
+                  <div className="io-box">
+                    <div className="io-box-header">
+                      <span>Sample Output {sIdx + 2}</span>
+                      <button
+                        type="button"
+                        className="icon-btn compact"
+                        onClick={() => copyText(`extra-out-${sIdx}`, extra.output)}
+                        aria-label="Copy sample output"
+                      >
+                        {copiedKey === `extra-out-${sIdx}` ? (
+                          <Check size={13} />
+                        ) : (
+                          <Copy size={13} />
+                        )}
+                      </button>
+                    </div>
+                    <pre className="io-pre">{extra.output}</pre>
+                  </div>
+                </div>
+                {extra.explanation && (
+                  <div className="explanation-card">
+                    <div className="explanation-detail" style={{ marginBottom: 0 }}>
+                      {extra.explanation}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+
             <div className="tags-row">
               {problem.tags?.map((tag) => (
                 <span key={tag} className="topic-tag">
@@ -238,8 +357,8 @@ export default function ProblemPanel({
         {activeTab === 'hints' && (
           <div>
             <p className="viz-intro" style={{ marginBottom: 14 }}>
-              Stuck on the problem? Reveal one hint at a time so you can still discover the
-              algorithm yourself!
+              Stuck on <strong>{problem.title}</strong>? Reveal one hint at a time so you can
+              still discover the key insight yourself!
             </p>
             <div className="hint-list">
               {problem.hints?.map((hint) => {

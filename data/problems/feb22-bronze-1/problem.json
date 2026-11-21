@@ -1,11 +1,17 @@
 {
   "id": "feb22-bronze-1",
+  "order": 1,
   "cpid": 1203,
   "contest": "USACO 2022 February Contest",
   "division": "Bronze",
   "number": 1,
   "title": "Sleeping in Class",
+  "difficulty": "Normal",
   "sourceUrl": "https://usaco.org/index.php?page=viewproblem2&cpid=1203",
+  "resultsUrl": "https://usaco.org/index.php?page=feb22results",
+  "editorialUrl": "https://usaco.org/current/data/sol_prob1_bronze_feb22.html",
+  "guideModule": "Basic Complete Search",
+  "guideUrl": "https://usaco.guide/bronze/intro-complete",
   "credits": "Jesse Choe",
   "limits": {
     "timeLimitCppMs": 2000,

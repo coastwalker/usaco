@@ -18,11 +18,18 @@ export async function listProblems() {
       const tests = await loadTestCaseMetadata(entry.name);
       problems.push({
         id: data.id,
+        order: data.order ?? 999,
         cpid: data.cpid,
         contest: data.contest,
         division: data.division,
         number: data.number,
         title: data.title,
+        difficulty: data.difficulty || 'Normal',
+        guideModule: data.guideModule || '',
+        guideUrl: data.guideUrl || '',
+        sourceUrl: data.sourceUrl || '',
+        resultsUrl: data.resultsUrl || '',
+        editorialUrl: data.editorialUrl || '',
         tags: data.tags || [],
         testCount: tests.length,
       });
@@ -31,7 +38,7 @@ export async function listProblems() {
     }
   }
 
-  return problems.sort((a, b) => a.id.localeCompare(b.id));
+  return problems.sort((a, b) => a.order - b.order || a.id.localeCompare(b.id));
 }
 
 export async function getProblem(id) {

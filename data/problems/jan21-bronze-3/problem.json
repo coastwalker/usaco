@@ -1,0 +1,77 @@
+{
+  "id": "jan21-bronze-3",
+  "order": 9,
+  "cpid": 1085,
+  "contest": "USACO 2021 January Contest",
+  "division": "Bronze",
+  "number": 3,
+  "title": "Just Stalling",
+  "difficulty": "Normal",
+  "sourceUrl": "https://usaco.org/index.php?page=viewproblem2&cpid=1085",
+  "resultsUrl": "https://usaco.org/index.php?page=jan21results",
+  "editorialUrl": "https://usaco.org/current/data/sol_prob3_bronze_jan21.html",
+  "guideModule": "Introduction to Sorting",
+  "guideUrl": "https://usaco.guide/bronze/intro-sorting",
+  "credits": "Shreyas Thumathy",
+  "limits": {
+    "timeLimitCppMs": 2000,
+    "timeLimitPythonMs": 4000,
+    "timeLimitJavaMs": 4000,
+    "memoryLimitMb": 256
+  },
+  "tags": ["Sorting", "Combinatorics", "64-bit Integers"],
+  "statement": {
+    "paragraphs": [
+      "Farmer John has N cows (1 ≤ N ≤ 20) of heights a₁…aₙ. His barn has N stalls with max height limits b₁…bₙ (so for example, if b₅ = 17, then a cow of height at most 17 can reside in stall 5).",
+      "In how many distinct ways can Farmer John arrange his cows so that each cow is in a different stall, and so that the height limit is satisfied for every stall?"
+    ],
+    "inputFormat": [
+      "The first line contains N.",
+      "The second line contains N space-separated integers a₁, a₂, …, aₙ.",
+      "The third line contains N space-separated integers b₁, b₂, …, bₙ. All heights and limits are in the range [1, 10⁹]."
+    ],
+    "outputFormat": [
+      "Print the number of ways Farmer John can place each cow into a different stall such that the height limit is satisfied for every stall. Note that the large size of the output might require the use of a 64-bit integer, like a \"long long\" in C++ or \"long\" in Java."
+    ],
+    "sampleInput": "4\n1 2 3 4\n2 4 3 4",
+    "sampleOutput": "8",
+    "sampleExplanation": [
+      {
+        "title": "Sample Analysis",
+        "detail": "Place the tallest cow (height 4) first: she fits in 2 stalls (limits 4 and 4). Next, cow of height 3 fits in 3 stalls total, minus the 1 stall already taken = 2 choices. Cow of height 2 fits in all 4 stalls minus 2 taken = 2 choices. Cow of height 1 gets the remaining 1 stall: 2 × 2 × 2 × 1 = 8.",
+        "steps": "Choices from tallest to shortest: 2 × 2 × 2 × 1 = 8"
+      }
+    ]
+  },
+  "hints": [
+    {
+      "level": 1,
+      "title": "Why N! Brute Force Is Too Slow",
+      "body": "When N = 20, 20! ≈ 2.4 × 10¹⁸, so checking all permutations will Time Limit Exceed! Which cow has the strictest requirement?"
+    },
+    {
+      "level": 2,
+      "title": "Place Cows from Tallest to Shortest!",
+      "body": "Sort the cows in descending order: a₀ ≥ a₁ ≥ … ≥ aₙ₋₁. Notice that ANY stall occupied by an earlier (taller) cow was ALSO tall enough for the current cow aᵢ!"
+    },
+    {
+      "level": 3,
+      "title": "Multiply Available Choices",
+      "body": "For the i-th tallest cow (0-indexed), let fit(i) be the total number of stalls with bⱼ ≥ aᵢ. Since all i previously placed cows are ≥ aᵢ, all i of their stalls are among those fit(i) stalls! So cow i has exactly max(0, fit(i) − i) valid stalls left. Multiply these counts using a 64-bit integer!"
+    }
+  ],
+  "editorial": {
+    "summary": "Sort cow heights in descending order. When placing the i-th tallest cow (0-indexed), every previously placed cow had height ≥ a[i] and therefore took one of the stalls with limit ≥ a[i]. If cnt is the number of stalls with b[j] ≥ a[i], there are (cnt − i) choices for cow i. Multiply over all i using 64-bit integers.",
+    "complexity": "Time: O(N²) or O(N log N)  |  Space: O(N)",
+    "solutions": {
+      "python": "import sys\n\ndef solve():\n    data = list(map(int, sys.stdin.read().split()))\n    n = data[0]\n    a = sorted(data[1:1 + n], reverse=True)\n    b = data[1 + n:1 + 2 * n]\n    ans = 1\n    for i, height in enumerate(a):\n        fit = sum(1 for limit in b if limit >= height)\n        choices = fit - i\n        if choices <= 0:\n            ans = 0\n            break\n        ans *= choices\n    print(ans)\n\nif __name__ == \"__main__\":\n    solve()\n",
+      "cpp": "#include <algorithm>\n#include <iostream>\n#include <vector>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    vector<long long> a(n), b(n);\n    for (int i = 0; i < n; i++) cin >> a[i];\n    for (int i = 0; i < n; i++) cin >> b[i];\n    sort(a.rbegin(), a.rend());\n    long long ans = 1;\n    for (int i = 0; i < n; i++) {\n        long long fit = 0;\n        for (int j = 0; j < n; j++) {\n            if (b[j] >= a[i]) fit++;\n        }\n        if (fit - i <= 0) { ans = 0; break; }\n        ans *= (fit - i);\n    }\n    cout << ans << '\\n';\n    return 0;\n}\n",
+      "java": "import java.io.*;\nimport java.util.*;\n\npublic class Main {\n    public static void main(String[] args) throws Exception {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        Long[] a = new Long[n];\n        long[] b = new long[n];\n        for (int i = 0; i < n; i++) a[i] = sc.nextLong();\n        for (int i = 0; i < n; i++) b[i] = sc.nextLong();\n        Arrays.sort(a, Collections.reverseOrder());\n        long ans = 1;\n        for (int i = 0; i < n; i++) {\n            long fit = 0;\n            for (int j = 0; j < n; j++) if (b[j] >= a[i]) fit++;\n            if (fit - i <= 0) { ans = 0; break; }\n            ans *= (fit - i);\n        }\n        System.out.println(ans);\n    }\n}\n"
+    }
+  },
+  "starterCode": {
+    "python": "import sys\n\ndef solve():\n    data = list(map(int, sys.stdin.read().split()))\n    if not data:\n        return\n    n = data[0]\n    a = data[1:1 + n]\n    b = data[1 + n:1 + 2 * n]\n    \n    # Write your solution here\n    print(0)\n\nif __name__ == \"__main__\":\n    solve()\n",
+    "cpp": "#include <algorithm>\n#include <iostream>\n#include <vector>\nusing namespace std;\n\nint main() {\n    int n;\n    if (!(cin >> n)) return 0;\n    vector<long long> a(n), b(n);\n    for (int i = 0; i < n; i++) cin >> a[i];\n    for (int i = 0; i < n; i++) cin >> b[i];\n    \n    // Write your solution here (use long long!)\n    cout << 0 << '\\n';\n    return 0;\n}\n",
+    "java": "import java.io.*;\nimport java.util.*;\n\npublic class Main {\n    public static void main(String[] args) throws Exception {\n        Scanner sc = new Scanner(System.in);\n        if (!sc.hasNextInt()) return;\n        int n = sc.nextInt();\n        long[] a = new long[n];\n        long[] b = new long[n];\n        for (int i = 0; i < n; i++) a[i] = sc.nextLong();\n        for (int i = 0; i < n; i++) b[i] = sc.nextLong();\n        \n        // Write your solution here (use long!)\n        System.out.println(0);\n    }\n}\n"
+  }
+}

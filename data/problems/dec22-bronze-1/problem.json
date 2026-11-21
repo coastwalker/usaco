@@ -1,0 +1,78 @@
+{
+  "id": "dec22-bronze-1",
+  "order": 2,
+  "cpid": 1251,
+  "contest": "USACO 2022 December Contest",
+  "division": "Bronze",
+  "number": 1,
+  "title": "Cow College",
+  "difficulty": "Easy",
+  "sourceUrl": "https://usaco.org/index.php?page=viewproblem2&cpid=1251",
+  "resultsUrl": "https://usaco.org/index.php?page=dec22results",
+  "editorialUrl": "https://usaco.org/current/data/sol_prob1_bronze_dec22.html",
+  "guideModule": "Introduction to Sorting",
+  "guideUrl": "https://usaco.guide/bronze/intro-sorting",
+  "credits": "Freddie Tang",
+  "limits": {
+    "timeLimitCppMs": 2000,
+    "timeLimitPythonMs": 4000,
+    "timeLimitJavaMs": 4000,
+    "memoryLimitMb": 256
+  },
+  "tags": ["Sorting", "Sweep", "64-bit Integers"],
+  "statement": {
+    "paragraphs": [
+      "Farmer John is planning to open a new university for cows!",
+      "There are N (1 ≤ N ≤ 10⁵) cows who could potentially attend this university. Each cow is willing to pay a maximum tuition of cᵢ (1 ≤ cᵢ ≤ 10⁶). Farmer John can set the tuition that all cows must pay to enroll. If this tuition is greater than the maximum a cow is willing to pay, then the cow will not attend the university.",
+      "Farmer John wants to make the most possible money so he can pay his instructors a fair wage. Please determine how much money he can make, and how much tuition he should charge."
+    ],
+    "inputFormat": [
+      "The first line contains N.",
+      "The second line contains N integers c₁, c₂, …, cₙ, where cᵢ is the maximum tuition cow i is willing to pay."
+    ],
+    "outputFormat": [
+      "Please output the maximum amount of money Farmer John can make and the optimal tuition he should charge. If there are multiple solutions, output the solution with the smallest optimal tuition.",
+      "Note that the large size of integers involved in this problem may require the use of 64-bit integer data types (e.g., a \"long\" in Java, a \"long long\" in C/C++)."
+    ],
+    "sampleInput": "4\n1 6 4 6",
+    "sampleOutput": "12 4",
+    "sampleExplanation": [
+      {
+        "title": "Sample Analysis",
+        "detail": "If Farmer John charges a tuition of 4, then 3 cows (those willing to pay 6, 4, and 6) will attend, earning 3 × 4 = 12. Charging 6 only attracts 2 cows for 2 × 6 = 12, and 4 is smaller than 6.",
+        "steps": "Sorted c = [1, 4, 6, 6]  →  tuition 4 × 3 cows = 12 (smallest optimal tuition)"
+      }
+    ]
+  },
+  "hints": [
+    {
+      "level": 1,
+      "title": "Which Tuition Values Could Be Optimal?",
+      "body": "Suppose Farmer John picks a tuition T that is strictly between two cows' limits. He could raise T up to the next cow's limit without losing any students! So the optimal tuition is always equal to one of the cᵢ values."
+    },
+    {
+      "level": 2,
+      "title": "Sort the Maximum Tuitions",
+      "body": "Sort the array c in non-decreasing order: c₀ ≤ c₁ ≤ … ≤ cₙ₋₁. Now, if you test setting the tuition to c[i], every cow from index i to N − 1 is willing to pay at least c[i]!"
+    },
+    {
+      "level": 3,
+      "title": "Count Attending Cows & Watch 64-bit Overflow",
+      "body": "When sorted left-to-right, setting tuition = c[i] brings in (N − i) cows (as long as we consider the first occurrence or note that a smaller index i for the same value gives a larger N − i). Track bestRevenue < revenue (strictly greater!) when scanning from smallest tuition to largest so ties automatically keep the smallest tuition. Remember N × cᵢ can reach 10¹¹, so use long long in C++ and long in Java!"
+    }
+  ],
+  "editorial": {
+    "summary": "Sort c in ascending order. Scanning i from 0 to N − 1, if Farmer John charges c[i], then at least (N − i) cows can afford it, yielding revenue (N − i) · c[i]. Updating only when revenue strictly exceeds bestRevenue naturally breaks ties in favor of the smallest tuition.",
+    "complexity": "Time: O(N log N)  |  Space: O(N)",
+    "solutions": {
+      "python": "import sys\n\ndef solve():\n    data = list(map(int, sys.stdin.read().split()))\n    n = data[0]\n    c = sorted(data[1:1 + n])\n    best_rev = -1\n    best_tuition = 0\n    for i, tuition in enumerate(c):\n        rev = tuition * (n - i)\n        if rev > best_rev:\n            best_rev = rev\n            best_tuition = tuition\n    print(f\"{best_rev} {best_tuition}\")\n\nif __name__ == \"__main__\":\n    solve()\n",
+      "cpp": "#include <algorithm>\n#include <iostream>\n#include <vector>\nusing namespace std;\n\nint main() {\n    ios::sync_with_stdio(false);\n    cin.tie(nullptr);\n    int n;\n    cin >> n;\n    vector<long long> c(n);\n    for (int i = 0; i < n; i++) cin >> c[i];\n    sort(c.begin(), c.end());\n    long long bestRev = -1, bestTuition = 0;\n    for (int i = 0; i < n; i++) {\n        long long rev = c[i] * (n - i);\n        if (rev > bestRev) {\n            bestRev = rev;\n            bestTuition = c[i];\n        }\n    }\n    cout << bestRev << ' ' << bestTuition << '\\n';\n    return 0;\n}\n",
+      "java": "import java.io.*;\nimport java.util.*;\n\npublic class Main {\n    public static void main(String[] args) throws Exception {\n        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));\n        int n = Integer.parseInt(br.readLine().trim());\n        StringTokenizer st = new StringTokenizer(br.readLine());\n        long[] c = new long[n];\n        for (int i = 0; i < n; i++) {\n            c[i] = Long.parseLong(st.nextToken());\n        }\n        Arrays.sort(c);\n        long bestRev = -1, bestTuition = 0;\n        for (int i = 0; i < n; i++) {\n            long rev = c[i] * (n - i);\n            if (rev > bestRev) {\n                bestRev = rev;\n                bestTuition = c[i];\n            }\n        }\n        System.out.println(bestRev + \" \" + bestTuition);\n    }\n}\n"
+    }
+  },
+  "starterCode": {
+    "python": "import sys\n\ndef solve():\n    data = list(map(int, sys.stdin.read().split()))\n    if not data:\n        return\n    n = data[0]\n    c = data[1:1 + n]\n    \n    # Write your solution here: print max_money and optimal_tuition\n    print(0, 0)\n\nif __name__ == \"__main__\":\n    solve()\n",
+    "cpp": "#include <algorithm>\n#include <iostream>\n#include <vector>\nusing namespace std;\n\nint main() {\n    ios::sync_with_stdio(false);\n    cin.tie(nullptr);\n    \n    int n;\n    if (!(cin >> n)) return 0;\n    vector<long long> c(n);\n    for (int i = 0; i < n; i++) {\n        cin >> c[i];\n    }\n    \n    // Write your solution here (remember 64-bit long long!)\n    cout << 0 << ' ' << 0 << '\\n';\n    return 0;\n}\n",
+    "java": "import java.io.*;\nimport java.util.*;\n\npublic class Main {\n    public static void main(String[] args) throws Exception {\n        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));\n        String line = br.readLine();\n        if (line == null) return;\n        int n = Integer.parseInt(line.trim());\n        StringTokenizer st = new StringTokenizer(br.readLine());\n        long[] c = new long[n];\n        for (int i = 0; i < n; i++) {\n            c[i] = Long.parseLong(st.nextToken());\n        }\n        \n        // Write your solution here (remember 64-bit long!)\n        System.out.println(\"0 0\");\n    }\n}\n"
+  }
+}

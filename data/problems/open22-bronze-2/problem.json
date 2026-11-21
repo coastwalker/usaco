@@ -1,0 +1,83 @@
+{
+  "id": "open22-bronze-2",
+  "order": 7,
+  "cpid": 1228,
+  "contest": "USACO 2022 US Open Contest",
+  "division": "Bronze",
+  "number": 2,
+  "title": "Counting Liars",
+  "difficulty": "Normal",
+  "sourceUrl": "https://usaco.org/index.php?page=viewproblem2&cpid=1228",
+  "resultsUrl": "https://usaco.org/index.php?page=open22results",
+  "editorialUrl": "https://usaco.org/current/data/sol_prob2_bronze_open22.html",
+  "guideModule": "Basic Complete Search",
+  "guideUrl": "https://usaco.guide/bronze/intro-complete",
+  "credits": "Jesse Choe",
+  "limits": {
+    "timeLimitCppMs": 2000,
+    "timeLimitPythonMs": 4000,
+    "timeLimitJavaMs": 4000,
+    "memoryLimitMb": 256
+  },
+  "tags": ["Complete Search", "Number Line", "Sorting"],
+  "statement": {
+    "paragraphs": [
+      "Bessie the cow is hiding somewhere along the number line. Each of Farmer John's N other cows (1 ≤ N ≤ 1000) have a piece of information to share: the i-th cow either says that Bessie is hiding at some location less than or equal to pᵢ, or that Bessie is hiding at some location greater than or equal to pᵢ (0 ≤ pᵢ ≤ 10⁹).",
+      "Unfortunately, it is possible that no hiding location is consistent with the answers of all of the cows, meaning that not all of the cows are telling the truth. Count the minimum number of cows that must be lying."
+    ],
+    "inputFormat": [
+      "The first line contains N.",
+      "The next N lines each contain either L or G, followed by an integer pᵢ. L means that the i-th cow says Bessie's hiding location is ≤ pᵢ, and G means that Bessie's hiding location is ≥ pᵢ."
+    ],
+    "outputFormat": [
+      "Print the minimum number of cows that must be lying."
+    ],
+    "sampleInput": "2\nG 3\nL 5",
+    "sampleOutput": "0",
+    "additionalSamples": [
+      {
+        "input": "2\nG 3\nL 2",
+        "output": "1",
+        "explanation": "No position x satisfies both x ≥ 3 and x ≤ 2, so at least 1 cow must be lying."
+      }
+    ],
+    "sampleExplanation": [
+      {
+        "title": "Sample 1 Analysis",
+        "detail": "If Bessie hides at x = 4 (or 3 or 5), both x ≥ 3 and x ≤ 5 are true, so 0 cows need to be lying.",
+        "steps": "Hiding spot x = 3..5  →  0 liars"
+      }
+    ]
+  },
+  "hints": [
+    {
+      "level": 1,
+      "title": "Can We Test Every Position up to 10⁹?",
+      "body": "Positions go up to 10⁹, so we cannot loop over every integer on the number line. Which positions actually change the set of lying cows?"
+    },
+    {
+      "level": 2,
+      "title": "Only the N Mentioned Positions pᵢ Matter!",
+      "body": "Suppose Bessie hides at some x. Sliding x to the nearest pᵢ never causes a truthful cow to start lying! So it suffices to test x = pᵢ for each of the N cows."
+    },
+    {
+      "level": 3,
+      "title": "O(N²) Check",
+      "body": "For each candidate x = p[i], count how many cows lie: a cow ('L', p[j]) lies if x > p[j], and a cow ('G', p[j]) lies if x < p[j]. Take the minimum across all N candidates! Since N ≤ 1000, N² ≤ 10⁶ operations runs fast."
+    }
+  ],
+  "editorial": {
+    "summary": "Only the N coordinates pᵢ need to be tested as candidate hiding spots for Bessie. For each candidate x = pᵢ, count how many ('L', pⱼ) have pⱼ < x and how many ('G', pⱼ) have pⱼ > x in O(N) time, taking the overall minimum.",
+    "complexity": "Time: O(N²) (or O(N log N) with sorting)  |  Space: O(N)",
+    "solutions": {
+      "python": "import sys\n\ndef solve():\n    tokens = sys.stdin.read().split()\n    n = int(tokens[0])\n    cows = []\n    idx = 1\n    for _ in range(n):\n        d = tokens[idx]\n        p = int(tokens[idx + 1])\n        idx += 2\n        cows.append((d, p))\n    ans = n\n    for _, x in cows:\n        liars = 0\n        for d, p in cows:\n            if (d == 'L' and x > p) or (d == 'G' and x < p):\n                liars += 1\n        if liars < ans:\n            ans = liars\n    print(ans)\n\nif __name__ == \"__main__\":\n    solve()\n",
+      "cpp": "#include <algorithm>\n#include <iostream>\n#include <vector>\nusing namespace std;\n\nint main() {\n    ios::sync_with_stdio(false);\n    cin.tie(nullptr);\n    int n;\n    cin >> n;\n    vector<pair<char, int>> cows(n);\n    for (int i = 0; i < n; i++) cin >> cows[i].first >> cows[i].second;\n    int ans = n;\n    for (int i = 0; i < n; i++) {\n        int x = cows[i].second;\n        int liars = 0;\n        for (int j = 0; j < n; j++) {\n            if ((cows[j].first == 'L' && x > cows[j].second) ||\n                (cows[j].first == 'G' && x < cows[j].second)) {\n                liars++;\n            }\n        }\n        ans = min(ans, liars);\n    }\n    cout << ans << '\\n';\n    return 0;\n}\n",
+      "java": "import java.io.*;\nimport java.util.*;\n\npublic class Main {\n    public static void main(String[] args) throws Exception {\n        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));\n        int n = Integer.parseInt(br.readLine().trim());\n        char[] dir = new char[n];\n        int[] pos = new int[n];\n        for (int i = 0; i < n; i++) {\n            StringTokenizer st = new StringTokenizer(br.readLine());\n            dir[i] = st.nextToken().charAt(0);\n            pos[i] = Integer.parseInt(st.nextToken());\n        }\n        int ans = n;\n        for (int i = 0; i < n; i++) {\n            int x = pos[i], liars = 0;\n            for (int j = 0; j < n; j++) {\n                if ((dir[j] == 'L' && x > pos[j]) || (dir[j] == 'G' && x < pos[j])) {\n                    liars++;\n                }\n            }\n            ans = Math.min(ans, liars);\n        }\n        System.out.println(ans);\n    }\n}\n"
+    }
+  },
+  "starterCode": {
+    "python": "import sys\n\ndef solve():\n    tokens = sys.stdin.read().split()\n    if not tokens:\n        return\n    n = int(tokens[0])\n    cows = []\n    for i in range(n):\n        cows.append((tokens[1 + 2 * i], int(tokens[2 + 2 * i])))\n    \n    # Write your solution here\n    print(0)\n\nif __name__ == \"__main__\":\n    solve()\n",
+    "cpp": "#include <iostream>\n#include <vector>\nusing namespace std;\n\nint main() {\n    ios::sync_with_stdio(false);\n    cin.tie(nullptr);\n    int n;\n    if (!(cin >> n)) return 0;\n    vector<pair<char, int>> cows(n);\n    for (int i = 0; i < n; i++) cin >> cows[i].first >> cows[i].second;\n    \n    // Write your solution here\n    cout << 0 << '\\n';\n    return 0;\n}\n",
+    "java": "import java.io.*;\nimport java.util.*;\n\npublic class Main {\n    public static void main(String[] args) throws Exception {\n        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));\n        String line = br.readLine();\n        if (line == null) return;\n        int n = Integer.parseInt(line.trim());\n        char[] dir = new char[n];\n        int[] pos = new int[n];\n        for (int i = 0; i < n; i++) {\n            StringTokenizer st = new StringTokenizer(br.readLine());\n            dir[i] = st.nextToken().charAt(0);\n            pos[i] = Integer.parseInt(st.nextToken());\n        }\n        \n        // Write your solution here\n        System.out.println(0);\n    }\n}\n"
+  }
+}

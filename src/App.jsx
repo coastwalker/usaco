@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Header from './components/Header.jsx';
 import LoginScreen from './components/LoginScreen.jsx';
+import ProblemDrawer from './components/ProblemDrawer.jsx';
 import ProblemPanel from './components/ProblemPanel.jsx';
 import CodeEditor from './components/CodeEditor.jsx';
 import ConsolePanel from './components/ConsolePanel.jsx';
@@ -31,8 +32,11 @@ export default function App() {
   const [theme, setTheme] = useState(() => readJson('theme:v2', 'dark'));
   const [fontSize, setFontSize] = useState(() => readJson('fontSize', 14));
   const [problems, setProblems] = useState([]);
-  const [activeProblemId, setActiveProblemId] = useState(null);
+  const [activeProblemId, setActiveProblemId] = useState(() =>
+    readJson('activeProblemId', null)
+  );
   const [activeProblem, setActiveProblem] = useState(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const [language, setLanguage] = useState(() => readJson('language', 'python'));
   const [code, setCode] = useState('');
@@ -74,6 +78,12 @@ export default function App() {
     writeJson('language', language);
   }, [language]);
 
+  useEffect(() => {
+    if (activeProblemId) {
+      writeJson('activeProblemId', activeProblemId);
+    }
+  }, [activeProblemId]);
+
   // Load problem catalog after signing in
   useEffect(() => {
     if (!session) {
@@ -83,7 +93,7 @@ export default function App() {
     fetchProblems()
       .then((list) => {
         setProblems(list);
-        if (list.length > 0 && !activeProblemId) {
+        if (list.length > 0 && (!activeProblemId || !list.some((p) => p.id === activeProblemId))) {
           setActiveProblemId(list[0].id);
         }
       })
@@ -96,6 +106,8 @@ export default function App() {
     fetchProblem(activeProblemId)
       .then((prob) => {
         setActiveProblem(prob);
+        setInputMode('sample');
+        setConsoleTab('testcase');
         setCustomInput(prob.statement.sampleInput);
         setCustomExpected(prob.statement.sampleOutput);
         setRunResult(null);
@@ -104,7 +116,7 @@ export default function App() {
         document.title = `${prob.title} — USACO Arena`;
       })
       .catch((err) => setErrorMessage(err.message));
-  }, [activeProblemId]);
+  }, [session, activeProblemId]);
 
   // Sync saved draft or starter template whenever problem or language changes
   useEffect(() => {
@@ -302,6 +314,7 @@ export default function App() {
   const currentSubmissions = activeProblem
     ? submissionsByProblem[activeProblem.id] || []
     : [];
+  const solvedCount = problems.filter((p) => solvedIds[p.id]).length;
 
   return (
     <div className="app-shell">
@@ -309,11 +322,22 @@ export default function App() {
         problems={problems}
         activeProblem={activeProblem}
         onSelectProblem={setActiveProblemId}
+        onOpenDrawer={() => setDrawerOpen(true)}
+        solvedCount={solvedCount}
         isSolved={Boolean(activeProblem && solvedIds[activeProblem.id])}
         theme={theme}
         onToggleTheme={() => setTheme((t) => (t === 'light' ? 'dark' : 'light'))}
         username={session.username}
         onSignOut={handleSignOut}
+      />
+
+      <ProblemDrawer
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        problems={problems}
+        activeProblemId={activeProblemId}
+        solvedIds={solvedIds}
+        onSelectProblem={setActiveProblemId}
       />
 
       <main ref={workspaceRef} className="workspace">

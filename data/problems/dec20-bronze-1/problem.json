@@ -1,0 +1,76 @@
+{
+  "id": "dec20-bronze-1",
+  "order": 3,
+  "cpid": 1059,
+  "contest": "USACO 2020 December Contest",
+  "division": "Bronze",
+  "number": 1,
+  "title": "Do You Know Your ABCs?",
+  "difficulty": "Easy",
+  "sourceUrl": "https://usaco.org/index.php?page=viewproblem2&cpid=1059",
+  "resultsUrl": "https://usaco.org/index.php?page=dec20results",
+  "editorialUrl": "https://usaco.org/current/data/sol_prob1_bronze_dec20.html",
+  "guideModule": "Introduction to Sorting",
+  "guideUrl": "https://usaco.guide/bronze/intro-sorting",
+  "credits": "Benjamin Qi",
+  "limits": {
+    "timeLimitCppMs": 2000,
+    "timeLimitPythonMs": 4000,
+    "timeLimitJavaMs": 4000,
+    "memoryLimitMb": 256
+  },
+  "tags": ["Sorting", "Math", "Ad Hoc"],
+  "statement": {
+    "paragraphs": [
+      "Farmer John's cows have been holding a daily online gathering on the \"mooZ\" video meeting platform. For fun, they have invented a simple number game to play during the meeting to keep themselves entertained.",
+      "Elsie has three positive integers A, B, and C (A ≤ B ≤ C). These integers are supposed to be secret, so she will not directly reveal them to her sister Bessie. Instead, she gives Bessie seven (not necessarily distinct) integers in the range 1…10⁹, claiming that they are A, B, C, A + B, B + C, C + A, and A + B + C in some order.",
+      "Given a list of these seven numbers, please help Bessie determine A, B, and C. It can be shown that the answer is unique."
+    ],
+    "inputFormat": [
+      "The only line of input consists of seven space-separated integers."
+    ],
+    "outputFormat": [
+      "Print A, B, and C separated by spaces."
+    ],
+    "sampleInput": "2 2 11 4 9 7 9",
+    "sampleOutput": "2 2 7",
+    "sampleExplanation": [
+      {
+        "title": "Sample Analysis",
+        "detail": "Sorting the seven integers gives [2, 2, 4, 7, 9, 9, 11]. With A = 2, B = 2, C = 7, the pairwise sums are 4, 9, 9 and the total sum A + B + C = 11.",
+        "steps": "Sorted: [2, 2, 4, 7, 9, 9, 11]  →  A = 2, B = 2, C = 11 − 2 − 2 = 7"
+      }
+    ]
+  },
+  "hints": [
+    {
+      "level": 1,
+      "title": "Use Positivity (A, B, C ≥ 1)",
+      "body": "Since A, B, and C are all positive integers with A ≤ B ≤ C, what are the two smallest numbers among the seven values? And what is the single largest number?"
+    },
+    {
+      "level": 2,
+      "title": "Sort the Seven Numbers",
+      "body": "Sort the 7 numbers as x₀ ≤ x₁ ≤ … ≤ x₆. Because A + B > B ≥ A, the two smallest numbers MUST be x₀ = A and x₁ = B! Can x₂ always be C? Careful: A + B could be smaller than C (like 2 + 2 = 4 < 7 in the sample!)."
+    },
+    {
+      "level": 3,
+      "title": "Recover C from the Maximum",
+      "body": "The largest of the 7 numbers is always x₆ = A + B + C. Since you already know A = x₀ and B = x₁, you can immediately compute C = x₆ − x₀ − x₁!"
+    }
+  ],
+  "editorial": {
+    "summary": "Sort the 7 positive integers in non-decreasing order. Since A, B, C > 0 and A ≤ B ≤ C, the two smallest values are guaranteed to be A = nums[0] and B = nums[1], while the largest value is A + B + C = nums[6]. Therefore C = nums[6] − nums[0] − nums[1].",
+    "complexity": "Time: O(1) (sorting 7 elements)  |  Space: O(1)",
+    "solutions": {
+      "python": "import sys\n\ndef solve():\n    nums = sorted(map(int, sys.stdin.read().split()))\n    a = nums[0]\n    b = nums[1]\n    c = nums[6] - a - b\n    print(a, b, c)\n\nif __name__ == \"__main__\":\n    solve()\n",
+      "cpp": "#include <algorithm>\n#include <iostream>\n#include <vector>\nusing namespace std;\n\nint main() {\n    vector<long long> nums(7);\n    for (int i = 0; i < 7; i++) cin >> nums[i];\n    sort(nums.begin(), nums.end());\n    long long a = nums[0], b = nums[1];\n    long long c = nums[6] - a - b;\n    cout << a << ' ' << b << ' ' << c << '\\n';\n    return 0;\n}\n",
+      "java": "import java.io.*;\nimport java.util.*;\n\npublic class Main {\n    public static void main(String[] args) throws Exception {\n        Scanner sc = new Scanner(System.in);\n        long[] nums = new long[7];\n        for (int i = 0; i < 7; i++) nums[i] = sc.nextLong();\n        Arrays.sort(nums);\n        long a = nums[0], b = nums[1];\n        long c = nums[6] - a - b;\n        System.out.println(a + \" \" + b + \" \" + c);\n    }\n}\n"
+    }
+  },
+  "starterCode": {
+    "python": "import sys\n\ndef solve():\n    nums = list(map(int, sys.stdin.read().split()))\n    if not nums:\n        return\n    \n    # Write your solution here and print A, B, C\n    print(0, 0, 0)\n\nif __name__ == \"__main__\":\n    solve()\n",
+    "cpp": "#include <algorithm>\n#include <iostream>\n#include <vector>\nusing namespace std;\n\nint main() {\n    vector<long long> nums(7);\n    for (int i = 0; i < 7; i++) {\n        if (!(cin >> nums[i])) return 0;\n    }\n    \n    // Write your solution here and print A B C\n    cout << 0 << ' ' << 0 << ' ' << 0 << '\\n';\n    return 0;\n}\n",
+    "java": "import java.io.*;\nimport java.util.*;\n\npublic class Main {\n    public static void main(String[] args) throws Exception {\n        Scanner sc = new Scanner(System.in);\n        if (!sc.hasNextLong()) return;\n        long[] nums = new long[7];\n        for (int i = 0; i < 7; i++) nums[i] = sc.nextLong();\n        \n        // Write your solution here and print A B C\n        System.out.println(\"0 0 0\");\n    }\n}\n"
+  }
+}

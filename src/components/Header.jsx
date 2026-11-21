@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import {
   CheckCircle2,
-  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   Clock,
   ExternalLink,
+  List,
   LogOut,
   Moon,
   Pause,
@@ -25,6 +27,8 @@ export default function Header({
   problems,
   activeProblem,
   onSelectProblem,
+  onOpenDrawer,
+  solvedCount,
   isSolved,
   theme,
   onToggleTheme,
@@ -42,34 +46,64 @@ export default function Header({
     return () => clearInterval(id);
   }, [timerRunning]);
 
+  const currentIdx = problems.findIndex((p) => p.id === activeProblem?.id);
+  const prevProblem = currentIdx > 0 ? problems[currentIdx - 1] : null;
+  const nextProblem =
+    currentIdx >= 0 && currentIdx < problems.length - 1 ? problems[currentIdx + 1] : null;
+
   return (
     <header className="top-header">
       <div className="header-left">
         <div className="brand-mark" title="USACO Competitive Programming Arena">
           <span className="brand-logo">U</span>
-          <span>USACO Arena</span>
+          <span className="brand-name-text">USACO Arena</span>
         </div>
 
         <span className="header-divider" />
 
-        {problems.length > 0 && activeProblem && (
-          <div className="problem-select-wrap">
-            <select
-              id="problem-selector"
-              aria-label="Select USACO problem"
-              className="problem-select"
-              value={activeProblem.id}
-              onChange={(e) => onSelectProblem(e.target.value)}
-            >
-              {problems.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.number}. {p.title} ({p.contest.replace('USACO ', '').replace(' Contest', '')})
-                </option>
-              ))}
-            </select>
-            <ChevronDown size={14} className="problem-select-chevron" />
-          </div>
-        )}
+        <div className="problem-nav-cluster">
+          <button
+            id="problem-list-btn"
+            type="button"
+            className="problem-list-trigger"
+            onClick={onOpenDrawer}
+            title="Open USACO practice problem list"
+          >
+            <List size={15} />
+            <span>
+              {activeProblem
+                ? `#${activeProblem.order || currentIdx + 1}. ${activeProblem.title}`
+                : 'Problem List'}
+            </span>
+            <span className="solved-counter-chip">
+              {solvedCount}/{problems.length || 11}
+            </span>
+          </button>
+
+          <button
+            id="prev-problem-btn"
+            type="button"
+            className="icon-btn bordered compact"
+            disabled={!prevProblem}
+            onClick={() => prevProblem && onSelectProblem(prevProblem.id)}
+            title={prevProblem ? `Previous: ${prevProblem.title}` : 'First problem'}
+            aria-label="Previous problem"
+          >
+            <ChevronLeft size={15} />
+          </button>
+
+          <button
+            id="next-problem-btn"
+            type="button"
+            className="icon-btn bordered compact"
+            disabled={!nextProblem}
+            onClick={() => nextProblem && onSelectProblem(nextProblem.id)}
+            title={nextProblem ? `Next: ${nextProblem.title}` : 'Last problem'}
+            aria-label="Next problem"
+          >
+            <ChevronRight size={15} />
+          </button>
+        </div>
 
         {activeProblem && <span className="division-badge">{activeProblem.division}</span>}
 

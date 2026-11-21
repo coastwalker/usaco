@@ -1,0 +1,86 @@
+{
+  "id": "jan23-bronze-1",
+  "order": 10,
+  "cpid": 1275,
+  "contest": "USACO 2023 January Contest",
+  "division": "Bronze",
+  "number": 1,
+  "title": "Leaders",
+  "difficulty": "Normal",
+  "sourceUrl": "https://usaco.org/index.php?page=viewproblem2&cpid=1275",
+  "resultsUrl": "https://usaco.org/index.php?page=jan23results",
+  "editorialUrl": "https://usaco.org/current/data/sol_prob1_bronze_jan23.html",
+  "guideModule": "Ad Hoc Problems",
+  "guideUrl": "https://usaco.guide/bronze/ad-hoc",
+  "credits": "Mythreya Dharani",
+  "limits": {
+    "timeLimitCppMs": 2000,
+    "timeLimitPythonMs": 4000,
+    "timeLimitJavaMs": 4000,
+    "memoryLimitMb": 256
+  },
+  "tags": ["Ad Hoc", "Casework", "Intervals"],
+  "statement": {
+    "paragraphs": [
+      "Farmer John has N cows (2 ≤ N ≤ 10⁵). Each cow has a breed that is either Guernsey or Holstein. As is often the case, the cows are standing in a line, numbered 1…N in this order.",
+      "Over the course of the day, each cow writes down a list of cows. Specifically, cow i's list contains the range of cows starting with herself (cow i) up to and including cow Eᵢ (i ≤ Eᵢ ≤ N).",
+      "FJ has recently discovered that each breed of cow has exactly one distinct leader. FJ does not know who the leaders are, but he knows that each leader must have a list that includes all the cows of their breed, or the other breed's leader (or both).",
+      "Help FJ count the number of pairs of cows that could be leaders. It is guaranteed that there is at least one possible pair."
+    ],
+    "inputFormat": [
+      "The first line contains N.",
+      "The second line contains a string of length N, with the i-th character denoting the breed of the i-th cow (G meaning Guernsey and H meaning Holstein). It is guaranteed that there is at least one Guernsey and one Holstein.",
+      "The third line contains E₁…Eₙ."
+    ],
+    "outputFormat": [
+      "Output the number of possible pairs of leaders."
+    ],
+    "sampleInput": "4\nGHHG\n2 4 3 4",
+    "sampleOutput": "1",
+    "additionalSamples": [
+      {
+        "input": "3\nGGH\n2 3 3",
+        "output": "2",
+        "explanation": "Cow 3 is the only Holstein, so her list [3..3] includes all Holsteins. Both Cow 1 (covers all Guernseys [1..2]) and Cow 2 (covers Cow 3 via [2..3]) can pair with Cow 3 → 2 pairs."
+      }
+    ],
+    "sampleExplanation": [
+      {
+        "title": "Sample 1 Analysis",
+        "detail": "The only valid leader pair is (1, 2): Cow 1's list [1..2] contains the Holstein leader (Cow 2), and Cow 2's list [2..4] contains all Holsteins (Cows 2 and 3).",
+        "steps": "Valid pair: (G_leader = 1, H_leader = 2)  →  1"
+      }
+    ]
+  },
+  "hints": [
+    {
+      "level": 1,
+      "title": "Which Cow Could Possibly Include ALL Cows of Her Breed?",
+      "body": "Since cow i's list starts at i and goes right to E[i], a cow with i > firstG misses cow firstG! Thus ONLY firstG can include all Guernseys (if E[firstG] ≥ lastG), and ONLY firstH can include all Holsteins (if E[firstH] ≥ lastH)!"
+    },
+    {
+      "level": 2,
+      "title": "At Least One Leader Must Cover Its Entire Breed",
+      "body": "Can BOTH leaders fail to cover their own breed? No! Because if G_leader < H_leader, then H_leader's list starts AFTER G_leader and can never include G_leader — so H_leader MUST cover all Holsteins (meaning H_leader == firstH)!"
+    },
+    {
+      "level": 3,
+      "title": "Clean Casework in O(N)",
+      "body": "1) Check if (firstG, firstH) itself is a valid pair directly. 2) If firstH covers all Holsteins, any G at i < firstH (with i != firstG) can pair with firstH if E[i] ≥ firstH. 3) Symmetrically, if firstG covers all Guernseys, any H at j < firstG (with j != firstH) can pair with firstG if E[j] ≥ firstG."
+    }
+  ],
+  "editorial": {
+    "summary": "Only firstG can cover all 'G' cows and only firstH can cover all 'H' cows, and at least one leader in any valid pair must cover its entire breed. Check (firstG, firstH) directly, then count earlier cows of the opposite breed whose interval reaches firstH (when firstH covers all H) or firstG (when firstG covers all G).",
+    "complexity": "Time: O(N)  |  Space: O(N)",
+    "solutions": {
+      "python": "import sys\n\ndef solve():\n    tokens = sys.stdin.read().split()\n    n = int(tokens[0])\n    s = tokens[1]\n    e = [int(x) - 1 for x in tokens[2:2 + n]]\n\n    first_g = s.index('G')\n    last_g = s.rindex('G')\n    first_h = s.index('H')\n    last_h = s.rindex('H')\n\n    g_all = e[first_g] >= last_g\n    h_all = e[first_h] >= last_h\n\n    ans = 0\n    g_ok = g_all or (first_g < first_h <= e[first_g])\n    h_ok = h_all or (first_h < first_g <= e[first_h])\n    if g_ok and h_ok:\n        ans += 1\n\n    if h_all:\n        for i in range(first_h):\n            if i != first_g and s[i] == 'G' and e[i] >= first_h:\n                ans += 1\n\n    if g_all:\n        for j in range(first_g):\n            if j != first_h and s[j] == 'H' and e[j] >= first_g:\n                ans += 1\n\n    print(ans)\n\nif __name__ == \"__main__\":\n    solve()\n",
+      "cpp": "#include <iostream>\n#include <string>\n#include <vector>\nusing namespace std;\n\nint main() {\n    ios::sync_with_stdio(false);\n    cin.tie(nullptr);\n    int n;\n    string s;\n    cin >> n >> s;\n    vector<int> e(n);\n    for (int i = 0; i < n; i++) { cin >> e[i]; e[i]--; }\n\n    int firstG = -1, lastG = -1, firstH = -1, lastH = -1;\n    for (int i = 0; i < n; i++) {\n        if (s[i] == 'G') {\n            if (firstG == -1) firstG = i;\n            lastG = i;\n        } else {\n            if (firstH == -1) firstH = i;\n            lastH = i;\n        }\n    }\n\n    bool gAll = e[firstG] >= lastG;\n    bool hAll = e[firstH] >= lastH;\n    long long ans = 0;\n    bool gOk = gAll || (firstG < firstH && e[firstG] >= firstH);\n    bool hOk = hAll || (firstH < firstG && e[firstH] >= firstG);\n    if (gOk && hOk) ans++;\n\n    if (hAll) {\n        for (int i = 0; i < firstH; i++) {\n            if (i != firstG && s[i] == 'G' && e[i] >= firstH) ans++;\n        }\n    }\n    if (gAll) {\n        for (int j = 0; j < firstG; j++) {\n            if (j != firstH && s[j] == 'H' && e[j] >= firstG) ans++;\n        }\n    }\n    cout << ans << '\\n';\n    return 0;\n}\n",
+      "java": "import java.io.*;\nimport java.util.*;\n\npublic class Main {\n    public static void main(String[] args) throws Exception {\n        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));\n        int n = Integer.parseInt(br.readLine().trim());\n        String s = br.readLine().trim();\n        StringTokenizer st = new StringTokenizer(br.readLine());\n        int[] e = new int[n];\n        for (int i = 0; i < n; i++) e[i] = Integer.parseInt(st.nextToken()) - 1;\n\n        int firstG = s.indexOf('G'), lastG = s.lastIndexOf('G');\n        int firstH = s.indexOf('H'), lastH = s.lastIndexOf('H');\n\n        boolean gAll = e[firstG] >= lastG;\n        boolean hAll = e[firstH] >= lastH;\n        long ans = 0;\n        boolean gOk = gAll || (firstG < firstH && e[firstG] >= firstH);\n        boolean hOk = hAll || (firstH < firstG && e[firstH] >= firstG);\n        if (gOk && hOk) ans++;\n\n        if (hAll) {\n            for (int i = 0; i < firstH; i++) {\n                if (i != firstG && s.charAt(i) == 'G' && e[i] >= firstH) ans++;\n            }\n        }\n        if (gAll) {\n            for (int j = 0; j < firstG; j++) {\n                if (j != firstH && s.charAt(j) == 'H' && e[j] >= firstG) ans++;\n            }\n        }\n        System.out.println(ans);\n    }\n}\n"
+    }
+  },
+  "starterCode": {
+    "python": "import sys\n\ndef solve():\n    tokens = sys.stdin.read().split()\n    if not tokens:\n        return\n    n = int(tokens[0])\n    s = tokens[1]\n    e = [int(x) for x in tokens[2:2 + n]]\n    \n    # Write your solution here\n    print(0)\n\nif __name__ == \"__main__\":\n    solve()\n",
+    "cpp": "#include <iostream>\n#include <string>\n#include <vector>\nusing namespace std;\n\nint main() {\n    ios::sync_with_stdio(false);\n    cin.tie(nullptr);\n    int n;\n    string s;\n    if (!(cin >> n >> s)) return 0;\n    vector<int> e(n);\n    for (int i = 0; i < n; i++) cin >> e[i];\n    \n    // Write your solution here\n    cout << 0 << '\\n';\n    return 0;\n}\n",
+    "java": "import java.io.*;\nimport java.util.*;\n\npublic class Main {\n    public static void main(String[] args) throws Exception {\n        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));\n        String line = br.readLine();\n        if (line == null) return;\n        int n = Integer.parseInt(line.trim());\n        String s = br.readLine().trim();\n        StringTokenizer st = new StringTokenizer(br.readLine());\n        int[] e = new int[n];\n        for (int i = 0; i < n; i++) e[i] = Integer.parseInt(st.nextToken());\n        \n        // Write your solution here\n        System.out.println(0);\n    }\n}\n"
+  }
+}
