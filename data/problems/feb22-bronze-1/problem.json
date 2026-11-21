@@ -1,0 +1,89 @@
+{
+  "id": "feb22-bronze-1",
+  "cpid": 1203,
+  "contest": "USACO 2022 February Contest",
+  "division": "Bronze",
+  "number": 1,
+  "title": "Sleeping in Class",
+  "sourceUrl": "https://usaco.org/index.php?page=viewproblem2&cpid=1203",
+  "credits": "Jesse Choe",
+  "limits": {
+    "timeLimitCppMs": 2000,
+    "timeLimitPythonMs": 4000,
+    "timeLimitJavaMs": 4000,
+    "memoryLimitMb": 256
+  },
+  "tags": ["Complete Search", "Math", "Divisors", "Greedy"],
+  "visualizer": "sleeping-in-class",
+  "statement": {
+    "paragraphs": [
+      "Bessie the cow was excited to recently return to in-person learning! Unfortunately, her instructor, Farmer John, is a very boring lecturer, and so she ends up falling asleep in class often.",
+      "Farmer John has noticed that Bessie has not been paying attention in class. He has asked another student in class, Elsie, to keep track of the number of times Bessie falls asleep in a given class. There are N class periods (1 ≤ N ≤ 10⁵), and Elsie logs that Bessie fell asleep aᵢ times (0 ≤ aᵢ ≤ 10⁶) in the i-th class period. The total number of times Bessie fell asleep across all class periods is at most 10⁶.",
+      "Elsie, feeling very competitive with Bessie, wants to make Farmer John feel like Bessie is consistently falling asleep the same number of times in every class — making it appear that the issue is entirely Bessie's fault, with no dependence on Farmer John's sometimes-boring lectures. The only way Elsie may modify the log is by combining two adjacent class periods. For example, if a = [1, 2, 3, 4, 5], then if Elsie combines the second and third class periods the log will become [1, 5, 4, 5].",
+      "Help Elsie compute the minimum number of modifications to the log that she needs to make so that she can make all the numbers in the log equal."
+    ],
+    "inputFormat": [
+      "Each input will contain T (1 ≤ T ≤ 10) test cases that should be solved independently.",
+      "The first line contains T, the number of test cases to be solved. The T test cases follow, each described by a pair of lines. The first line of each pair contains N, and the second contains a₁, a₂, …, aₙ.",
+      "It is guaranteed that within each test case, the sum of all values in a is at most 10⁶. It is also guaranteed that the sum of N over all test cases is at most 10⁵."
+    ],
+    "outputFormat": [
+      "Please write T lines of output, giving the minimum number of modifications Elsie could perform to make all the log entries equal for each case."
+    ],
+    "sampleInput": "3\n6\n1 2 3 1 1 1\n3\n2 2 3\n5\n0 0 0 0 0",
+    "sampleOutput": "3\n2\n0",
+    "sampleExplanation": [
+      {
+        "title": "Test Case 1: [1, 2, 3, 1, 1, 1] → 3 modifications",
+        "detail": "Elsie can change her log to consist solely of 3s with 3 modifications:",
+        "steps": "1 2 3 1 1 1  →  3 3 1 1 1  →  3 3 2 1  →  3 3 3"
+      },
+      {
+        "title": "Test Case 2: [2, 2, 3] → 2 modifications",
+        "detail": "Elsie can change her log to a single 7 with 2 modifications:",
+        "steps": "2 2 3  →  2 5  →  7"
+      },
+      {
+        "title": "Test Case 3: [0, 0, 0, 0, 0] → 0 modifications",
+        "detail": "Elsie doesn't need to perform any operations; the log already consists of equal entries.",
+        "steps": "0 0 0 0 0"
+      }
+    ]
+  },
+  "hints": [
+    {
+      "level": 1,
+      "title": "Look for an Invariant",
+      "body": "Every time Elsie combines two adjacent entries x and y into (x + y), what stays completely unchanged about the entire array? Notice that the total sum S = a₁ + a₂ + … + aₙ never changes, and each modification reduces the array length by exactly 1."
+    },
+    {
+      "level": 2,
+      "title": "Relate Modifications to Remaining Groups",
+      "body": "If the final array has r equal elements, Elsie must have performed exactly (N − r) modifications! To minimize modifications, we want to maximize r (the number of equal-sum contiguous groups). Because all r groups have the same sum, r must divide the total sum S, and each group must sum to target = S / r."
+    },
+    {
+      "level": 3,
+      "title": "Greedy Left-to-Right Check in O(N)",
+      "body": "For a candidate number of groups r (with S % r == 0), set target = S / r and walk through the array keeping a running sum cur. Add a[i] to cur: if cur == target, close the group and reset cur = 0; if cur > target, this target is impossible! Check r from N down to 1 (or try divisors of S) and stop at the largest valid r."
+    },
+    {
+      "level": 4,
+      "title": "Edge Cases & Complexity",
+      "body": "Watch out for the all-zeros case (S == 0): when S == 0, every entry is already 0, so the answer is 0 (0 % r == 0 works naturally if you check r = N first!). Since S ≤ 10⁶ has at most 240 divisors, checking each divisor takes O(N · d(S)), which runs easily within the USACO time limit."
+    }
+  ],
+  "editorial": {
+    "summary": "Keep track of the invariant total sum S. Instead of minimizing merges directly, maximize the number of remaining equal-sum segments r (from N down to 1). Whenever S % r == 0, greedily partition the array left-to-right into segments of sum S / r in O(N) time. The first valid r gives the answer N − r.",
+    "complexity": "Time: O(N · d(S)) where d(S) ≤ 240 for S ≤ 10⁶  |  Space: O(N)",
+    "solutions": {
+      "python": "import sys\n\ndef solve():\n    data = list(map(int, sys.stdin.read().split()))\n    idx = 0\n    t = data[idx]; idx += 1\n    out = []\n    for _ in range(t):\n        n = data[idx]; idx += 1\n        a = data[idx:idx + n]; idx += n\n        total = sum(a)\n        if total == 0:\n            out.append(\"0\")\n            continue\n        for r in range(n, 0, -1):\n            if total % r == 0:\n                target = total // r\n                cur = 0\n                ok = True\n                for x in a:\n                    cur += x\n                    if cur > target:\n                        ok = False\n                        break\n                    if cur == target:\n                        cur = 0\n                if ok:\n                    out.append(str(n - r))\n                    break\n    print(\"\\n\".join(out))\n\nif __name__ == \"__main__\":\n    solve()\n",
+      "cpp": "#include <iostream>\n#include <vector>\nusing namespace std;\n\nvoid solve() {\n    int n;\n    cin >> n;\n    vector<int> a(n);\n    int total = 0;\n    for (int i = 0; i < n; i++) {\n        cin >> a[i];\n        total += a[i];\n    }\n    for (int r = n; r >= 1; r--) {\n        if (total % r == 0) {\n            int target = total / r;\n            int cur = 0;\n            bool ok = true;\n            for (int x : a) {\n                cur += x;\n                if (cur > target) {\n                    ok = false;\n                    break;\n                }\n                if (cur == target) {\n                    cur = 0;\n                }\n            }\n            if (ok) {\n                cout << n - r << '\\n';\n                return;\n            }\n        }\n    }\n}\n\nint main() {\n    ios::sync_with_stdio(false);\n    cin.tie(nullptr);\n    int t;\n    cin >> t;\n    while (t--) solve();\n    return 0;\n}\n",
+      "java": "import java.io.*;\nimport java.util.*;\n\npublic class Main {\n    public static void main(String[] args) throws Exception {\n        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));\n        StringTokenizer st = new StringTokenizer(br.readLine());\n        int t = Integer.parseInt(st.nextToken());\n        StringBuilder sb = new StringBuilder();\n        while (t-- > 0) {\n            int n = Integer.parseInt(br.readLine().trim());\n            st = new StringTokenizer(br.readLine());\n            int[] a = new int[n];\n            int total = 0;\n            for (int i = 0; i < n; i++) {\n                a[i] = Integer.parseInt(st.nextToken());\n                total += a[i];\n            }\n            for (int r = n; r >= 1; r--) {\n                if (total % r == 0) {\n                    int target = total / r;\n                    int cur = 0;\n                    boolean ok = true;\n                    for (int x : a) {\n                        cur += x;\n                        if (cur > target) {\n                            ok = false;\n                            break;\n                        }\n                        if (cur == target) {\n                            cur = 0;\n                        }\n                    }\n                    if (ok) {\n                        sb.append(n - r).append('\\n');\n                        break;\n                    }\n                }\n            }\n        }\n        System.out.print(sb);\n    }\n}\n"
+    }
+  },
+  "starterCode": {
+    "python": "import sys\n\ndef solve():\n    data = list(map(int, sys.stdin.read().split()))\n    if not data:\n        return\n    idx = 0\n    t = data[idx]\n    idx += 1\n    \n    for _ in range(t):\n        n = data[idx]\n        idx += 1\n        a = data[idx:idx + n]\n        idx += n\n        \n        # Write your solution here and print the minimum modifications\n        print(0)\n\nif __name__ == \"__main__\":\n    solve()\n",
+    "cpp": "#include <iostream>\n#include <vector>\nusing namespace std;\n\nvoid solve() {\n    int n;\n    cin >> n;\n    vector<int> a(n);\n    for (int i = 0; i < n; i++) {\n        cin >> a[i];\n    }\n    \n    // Write your solution here and output the minimum modifications\n    cout << 0 << '\\n';\n}\n\nint main() {\n    ios::sync_with_stdio(false);\n    cin.tie(nullptr);\n    \n    int t;\n    if (cin >> t) {\n        while (t--) {\n            solve();\n        }\n    }\n    return 0;\n}\n",
+    "java": "import java.io.*;\nimport java.util.*;\n\npublic class Main {\n    public static void main(String[] args) throws Exception {\n        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));\n        String firstLine = br.readLine();\n        if (firstLine == null) return;\n        int t = Integer.parseInt(firstLine.trim());\n        StringBuilder out = new StringBuilder();\n        \n        while (t-- > 0) {\n            int n = Integer.parseInt(br.readLine().trim());\n            StringTokenizer st = new StringTokenizer(br.readLine());\n            int[] a = new int[n];\n            for (int i = 0; i < n; i++) {\n                a[i] = Integer.parseInt(st.nextToken());\n            }\n            \n            // Write your solution here and append the answer\n            out.append(0).append('\\n');\n        }\n        System.out.print(out);\n    }\n}\n"
+  }
+}
