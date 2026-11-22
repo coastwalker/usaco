@@ -2,7 +2,7 @@
 
 A LeetCode & USACO-style online competitive programming practice web app built for USACO preparation.
 
-## Included Official USACO Bronze Practice Set (12 Problems · 139 Test Cases)
+## Included Official USACO Practice Set (14 Problems · 159 Test Cases)
 
 1. **Sleeping in Class** — 2022 Feb Bronze, Problem 1 ([cpid=1203](https://usaco.org/index.php?page=viewproblem2&cpid=1203)) · *Basic Complete Search* · 11 tests + interactive visualizer
 2. **Cow College** — 2022 Dec Bronze, Problem 1 ([cpid=1251](https://usaco.org/index.php?page=viewproblem2&cpid=1251)) · *Introduction to Sorting* · 12 tests
@@ -16,6 +16,8 @@ A LeetCode & USACO-style online competitive programming practice web app built f
 10. **Leaders** — 2023 Jan Bronze, Problem 1 ([cpid=1275](https://usaco.org/index.php?page=viewproblem2&cpid=1275)) · *Ad Hoc Problems* · 17 tests
 11. **Air Cownditioning II** — 2023 Jan Bronze, Problem 2 ([cpid=1276](https://usaco.org/index.php?page=viewproblem2&cpid=1276)) · *Complete Search with Recursion* · 11 tests
 12. **Watching Mooloo** — 2023 Feb Bronze, Problem 3 ([cpid=1301](https://usaco.org/index.php?page=viewproblem2&cpid=1301)) · *Introduction to Greedy Algorithms* · 12 tests
+13. **The Great Revegetation** — 2019 Feb Bronze, Problem 2 ([cpid=916](https://usaco.org/index.php?page=viewproblem2&cpid=916)) · *Introduction to Graphs* · 10 tests
+14. **Grass Planting** — 2019 Jan Silver, Problem 1 ([cpid=894](https://usaco.org/index.php?page=viewproblem2&cpid=894)) · *Introduction to Graphs (Trees)* · 10 tests
 
 ## Features
 

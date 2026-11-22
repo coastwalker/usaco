@@ -1,0 +1,85 @@
+{
+  "id": "feb19-bronze-2",
+  "order": 13,
+  "cpid": 916,
+  "contest": "USACO 2019 February Contest",
+  "division": "Bronze",
+  "number": 2,
+  "title": "The Great Revegetation",
+  "difficulty": "Normal",
+  "recommendedTag": "Day 7 — Intro to Graphs & Coloring",
+  "fileIo": {
+    "in": "revegetate.in",
+    "out": "revegetate.out"
+  },
+  "sourceUrl": "https://usaco.org/index.php?page=viewproblem2&cpid=916",
+  "resultsUrl": "https://usaco.org/index.php?page=feb19results",
+  "editorialUrl": "https://usaco.org/current/data/sol_revegetate_bronze_feb19.html",
+  "guideModule": "Introduction to Graphs",
+  "guideUrl": "https://usaco.guide/bronze/intro-graphs",
+  "credits": "Dhruv Rohatgi",
+  "limits": {
+    "timeLimitCppMs": 2000,
+    "timeLimitPythonMs": 4000,
+    "timeLimitJavaMs": 4000,
+    "memoryLimitMb": 256
+  },
+  "tags": ["Graphs", "Adjacency List", "Greedy Coloring"],
+  "whyItMatters": "After progressing through Recursion/Backtracking (Days 1–2), Simulation (Day 3), Complete Search (Day 4), Sorting/Sets (Day 5), and Greedy Algorithms (Day 6), today begins Introduction to Graphs & Trees. The Great Revegetation teaches the most important graph representation skill in competitive programming: modeling constraints as an undirected graph using an adjacency list (where pastures are vertices, cows are edges, and vertex degrees are at most 3), then greedily assigning the smallest available color to each vertex in order 1..N.",
+  "statement": {
+    "paragraphs": [
+      "A lengthy drought has left Farmer John's N pastures devoid of grass. However, with the rainy season arriving soon, the time has come to \"revegetate\".",
+      "In Farmer John's shed, he has four buckets, each with a different type of grass seed (labeled 1, 2, 3, and 4). He wishes to sow each pasture with one of these types of seeds. Being a dairy farmer, Farmer John wants to make sure each of his cows has a varied diet. Each of his M cows has two favorite pastures, and he wants to be sure different types of grass are planted in each, so every cow can choose between two types of grass. Farmer John knows that no pasture is a favorite of more than 3 cows.",
+      "Please help Farmer John choose a grass type for each pasture so that the nutritional needs of all cows are satisfied."
+    ],
+    "inputFormat": [
+      "The first line of input contains N (2 ≤ N ≤ 100) and M (1 ≤ M ≤ 150).",
+      "Each of the next M lines contains two integers in the range 1…N, describing the pair of pastures that are the two favorites for one of Farmer John's cows.",
+      "Note: Both legacy USACO file I/O (revegetate.in / revegetate.out) and standard I/O (stdin / stdout) are supported in this arena."
+    ],
+    "outputFormat": [
+      "Output an N-digit number, with each digit in the range 1…4, describing the grass type to be planted in each field (with NO spaces between digits). The first digit corresponds to field 1, the second digit to field 2, and so on.",
+      "If there are multiple valid solutions, print only the N-digit number that is smallest among all of them."
+    ],
+    "sampleInput": "5 6\n4 1\n4 2\n4 3\n2 5\n1 2\n1 5",
+    "sampleOutput": "12133",
+    "sampleExplanation": [
+      {
+        "title": "Sample Analysis",
+        "detail": "Coloring pastures 1..5 greedily with the smallest grass type not yet used by earlier neighbors:",
+        "steps": "P1 → 1  |  P2 (nbr 1) → 2  |  P3 (no earlier nbrs) → 1  |  P4 (nbrs 1,2,3 use {1,2}) → 3  |  P5 (nbrs 1,2 use {1,2}) → 3  ⇒  12133"
+      }
+    ]
+  },
+  "hints": [
+    {
+      "level": 1,
+      "title": "Modeling the Problem as a Graph",
+      "body": "Think of each pasture 1..N as a vertex in an undirected graph, and each cow with favorite pastures (u, v) as an undirected edge between u and v. Because no pasture is a favorite of more than 3 cows, every vertex has degree ≤ 3! So when we color vertices 1..N one by one, at most 3 neighbors can already be colored — guaranteeing that at least 1 of the 4 grass types {1, 2, 3, 4} is ALWAYS available!"
+    },
+    {
+      "level": 2,
+      "title": "Greedy Lexicographical Coloring Algorithm",
+      "body": "1) Build an adjacency list adj[1..N]; for each cow (u, v), add v to adj[u] and u to adj[v]. 2) Maintain color[1..N] initialized to 0. 3) Loop i from 1 to N: create used[1..4] = false, mark used[color[nbr]] = true for every neighbor nbr in adj[i] with color[nbr] != 0, and pick the smallest c in {1, 2, 3, 4} with !used[c] as color[i]. 4) Print color[1]..color[N] concatenated with no spaces!"
+    },
+    {
+      "level": 3,
+      "title": "Time Complexity & Formatting / File I/O Tips",
+      "body": "Time Complexity: Building adj and coloring all N vertices checks each edge twice in O(N + M) time (< 1 ms for N ≤ 100, M ≤ 150). Legacy File I/O Reminder: On usaco.org (2019 contest), read from revegetate.in and write to revegetate.out (our arena supports both revegetate.in/.out and stdin/stdout!). Make sure all N digits are printed on one line with NO spaces (e.g. 12133)."
+    }
+  ],
+  "editorial": {
+    "summary": "Build an undirected adjacency list for the N pastures and M cow edges. Since maximum degree ≤ 3, greedily assigning each pasture i = 1..N the smallest color in {1, 2, 3, 4} not used by any already-colored neighbor is always valid and lexicographically minimal.",
+    "complexity": "Time: O(N + M)  |  Space: O(N + M)",
+    "solutions": {
+      "python": "import os\nimport sys\n\ndef solve():\n    if os.path.exists(\"revegetate.in\"):\n        data = list(map(int, open(\"revegetate.in\").read().split()))\n    else:\n        data = list(map(int, sys.stdin.read().split()))\n    n, m = data[0], data[1]\n    adj = [[] for _ in range(n + 1)]\n    idx = 2\n    for _ in range(m):\n        u, v = data[idx], data[idx + 1]\n        idx += 2\n        adj[u].append(v)\n        adj[v].append(u)\n\n    color = [0] * (n + 1)\n    for i in range(1, n + 1):\n        used = {color[nbr] for nbr in adj[i] if color[nbr] != 0}\n        for c in range(1, 5):\n            if c not in used:\n                color[i] = c\n                break\n\n    ans = \"\".join(str(color[i]) for i in range(1, n + 1))\n    if os.path.exists(\"revegetate.in\"):\n        with open(\"revegetate.out\", \"w\") as f:\n            f.write(ans + \"\\n\")\n    else:\n        print(ans)\n\nif __name__ == \"__main__\":\n    solve()\n",
+      "cpp": "#include <cstdio>\n#include <iostream>\n#include <vector>\nusing namespace std;\n\nint main() {\n    if (FILE* f = fopen(\"revegetate.in\", \"r\")) {\n        fclose(f);\n        freopen(\"revegetate.in\", \"r\", stdin);\n        freopen(\"revegetate.out\", \"w\", stdout);\n    }\n    int n, m;\n    cin >> n >> m;\n    vector<vector<int>> adj(n + 1);\n    for (int i = 0; i < m; i++) {\n        int u, v;\n        cin >> u >> v;\n        adj[u].push_back(v);\n        adj[v].push_back(u);\n    }\n    vector<int> color(n + 1, 0);\n    for (int i = 1; i <= n; i++) {\n        bool used[5] = {};\n        for (int nbr : adj[i]) {\n            if (color[nbr] != 0) used[color[nbr]] = true;\n        }\n        for (int c = 1; c <= 4; c++) {\n            if (!used[c]) {\n                color[i] = c;\n                break;\n            }\n        }\n        cout << color[i];\n    }\n    cout << '\\n';\n    return 0;\n}\n",
+      "java": "import java.io.*;\nimport java.util.*;\n\npublic class Main {\n    public static void main(String[] args) throws Exception {\n        File inFile = new File(\"revegetate.in\");\n        BufferedReader br = inFile.exists()\n            ? new BufferedReader(new FileReader(inFile))\n            : new BufferedReader(new InputStreamReader(System.in));\n        StringTokenizer st = new StringTokenizer(br.readLine());\n        int n = Integer.parseInt(st.nextToken());\n        int m = Integer.parseInt(st.nextToken());\n        List<List<Integer>> adj = new ArrayList<>(n + 1);\n        for (int i = 0; i <= n; i++) adj.add(new ArrayList<>());\n        for (int i = 0; i < m; i++) {\n            st = new StringTokenizer(br.readLine());\n            int u = Integer.parseInt(st.nextToken());\n            int v = Integer.parseInt(st.nextToken());\n            adj.get(u).add(v);\n            adj.get(v).add(u);\n        }\n        int[] color = new int[n + 1];\n        StringBuilder sb = new StringBuilder();\n        for (int i = 1; i <= n; i++) {\n            boolean[] used = new boolean[5];\n            for (int nbr : adj.get(i)) {\n                if (color[nbr] != 0) used[color[nbr]] = true;\n            }\n            for (int c = 1; c <= 4; c++) {\n                if (!used[c]) {\n                    color[i] = c;\n                    break;\n                }\n            }\n            sb.append(color[i]);\n        }\n        if (inFile.exists()) {\n            try (PrintWriter pw = new PrintWriter(new FileWriter(\"revegetate.out\"))) {\n                pw.println(sb.toString());\n            }\n        } else {\n            System.out.println(sb.toString());\n        }\n    }\n}\n"
+    }
+  },
+  "starterCode": {
+    "python": "import sys\n\ndef solve():\n    # Tip: You can use stdin/stdout OR open('revegetate.in') / open('revegetate.out', 'w')\n    data = list(map(int, sys.stdin.read().split()))\n    if not data:\n        return\n    n, m = data[0], data[1]\n    adj = [[] for _ in range(n + 1)]\n    idx = 2\n    for _ in range(m):\n        u, v = data[idx], data[idx + 1]\n        idx += 2\n        adj[u].append(v)\n        adj[v].append(u)\n    \n    # Assign grass types 1..4 to pastures 1..n and print without spaces\n    print(\"1\" * n)\n\nif __name__ == \"__main__\":\n    solve()\n",
+    "cpp": "#include <iostream>\n#include <vector>\nusing namespace std;\n\nint main() {\n    // Tip: Both cin/cout and revegetate.in / revegetate.out are supported!\n    int n, m;\n    if (!(cin >> n >> m)) return 0;\n    vector<vector<int>> adj(n + 1);\n    for (int i = 0; i < m; i++) {\n        int u, v;\n        cin >> u >> v;\n        adj[u].push_back(v);\n        adj[v].push_back(u);\n    }\n    \n    // Assign grass types 1..4 to pastures 1..n and print without spaces\n    for (int i = 1; i <= n; i++) cout << 1;\n    cout << '\\n';\n    return 0;\n}\n",
+    "java": "import java.io.*;\nimport java.util.*;\n\npublic class Main {\n    public static void main(String[] args) throws Exception {\n        // Tip: Both System.in/out and revegetate.in / revegetate.out are supported!\n        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));\n        String firstLine = br.readLine();\n        if (firstLine == null) return;\n        StringTokenizer st = new StringTokenizer(firstLine);\n        int n = Integer.parseInt(st.nextToken());\n        int m = Integer.parseInt(st.nextToken());\n        List<List<Integer>> adj = new ArrayList<>(n + 1);\n        for (int i = 0; i <= n; i++) adj.add(new ArrayList<>());\n        for (int i = 0; i < m; i++) {\n            st = new StringTokenizer(br.readLine());\n            int u = Integer.parseInt(st.nextToken());\n            int v = Integer.parseInt(st.nextToken());\n            adj.get(u).add(v);\n            adj.get(v).add(u);\n        }\n        \n        // Assign grass types 1..4 to pastures 1..n and print without spaces\n        StringBuilder sb = new StringBuilder();\n        for (int i = 1; i <= n; i++) sb.append(1);\n        System.out.println(sb.toString());\n    }\n}\n"
+  }
+}

@@ -50,7 +50,7 @@ export default function ProblemDrawer({
           <div>
             <h2 className="drawer-title">USACO Practice Set</h2>
             <div className="drawer-subtitle">
-              Official USACO Bronze Problems & Test Data
+              Official USACO Bronze & Silver-Bridge Problems
             </div>
           </div>
           <button
@@ -127,6 +127,11 @@ export default function ProblemDrawer({
                   <div className="drawer-item-top">
                     <span className="drawer-item-order">#{p.order}</span>
                     <span className="drawer-item-title">{p.title}</span>
+                    {p.division && p.division !== 'Bronze' && (
+                      <span className={`division-badge division-${p.division.toLowerCase()}`}>
+                        {p.division}
+                      </span>
+                    )}
                     <span className={`diff-badge diff-${(p.difficulty || 'Normal').toLowerCase()}`}>
                       {p.difficulty || 'Normal'}
                     </span>

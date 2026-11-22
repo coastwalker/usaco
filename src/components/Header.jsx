@@ -76,7 +76,7 @@ export default function Header({
                 : 'Problem List'}
             </span>
             <span className="solved-counter-chip">
-              {solvedCount}/{problems.length || 12}
+              {solvedCount}/{problems.length || 14}
             </span>
           </button>
 
@@ -105,7 +105,13 @@ export default function Header({
           </button>
         </div>
 
-        {activeProblem && <span className="division-badge">{activeProblem.division}</span>}
+        {activeProblem && (
+          <span
+            className={`division-badge division-${(activeProblem.division || 'Bronze').toLowerCase()}`}
+          >
+            {activeProblem.division}
+          </span>
+        )}
 
         {isSolved && (
           <span className="solved-pill" title="Passed all official test cases">

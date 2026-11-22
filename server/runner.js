@@ -194,7 +194,31 @@ function resolveTimeLimit(language, limits) {
   return limits.timeLimitPythonMs || 4000;
 }
 
-export async function runCustomInput({ language, code, input, expectedOutput = null, limits }) {
+async function prepareFileIo(workDir, fileIo, input) {
+  if (!fileIo?.in) return;
+  await fs.writeFile(path.join(workDir, path.basename(fileIo.in)), input, 'utf8');
+  if (fileIo.out) {
+    await fs.rm(path.join(workDir, path.basename(fileIo.out)), { force: true });
+  }
+}
+
+async function resolveProgramOutput(workDir, fileIo, stdout) {
+  if (stdout !== '' || !fileIo?.out) return stdout;
+  try {
+    return await fs.readFile(path.join(workDir, path.basename(fileIo.out)), 'utf8');
+  } catch {
+    return stdout;
+  }
+}
+
+export async function runCustomInput({
+  language,
+  code,
+  input,
+  expectedOutput = null,
+  limits,
+  fileIo = null,
+}) {
   const workDir = await fs.mkdtemp(path.join(os.tmpdir(), 'usaco-run-'));
   try {
     const prepared = await prepareExecution(language, code, workDir);
@@ -209,6 +233,7 @@ export async function runCustomInput({ language, code, input, expectedOutput = n
       };
     }
 
+    await prepareFileIo(workDir, fileIo, input);
     const timeoutMs = resolveTimeLimit(language, limits);
     const result = await runProcess(prepared.command, prepared.args, {
       cwd: workDir,
@@ -216,11 +241,13 @@ export async function runCustomInput({ language, code, input, expectedOutput = n
       timeoutMs,
     });
 
+    const finalStdout = await resolveProgramOutput(workDir, fileIo, result.stdout);
+
     if (result.timedOut) {
       return {
         status: 'TLE',
         elapsedMs: timeoutMs,
-        stdout: result.stdout,
+        stdout: finalStdout,
         stderr: result.stderr,
         matched: false,
       };
@@ -230,7 +257,7 @@ export async function runCustomInput({ language, code, input, expectedOutput = n
       return {
         status: 'OLE',
         elapsedMs: result.elapsedMs,
-        stdout: result.stdout,
+        stdout: finalStdout,
         stderr: 'Output exceeded 2 MB limit.',
         matched: false,
       };
@@ -242,7 +269,7 @@ export async function runCustomInput({ language, code, input, expectedOutput = n
         exitCode: result.code,
         signal: result.signal,
         elapsedMs: result.elapsedMs,
-        stdout: result.stdout,
+        stdout: finalStdout,
         stderr: result.stderr,
         matched: false,
       };
@@ -251,7 +278,7 @@ export async function runCustomInput({ language, code, input, expectedOutput = n
     let status = 'OK';
     let matched = null;
     if (expectedOutput !== null && expectedOutput !== undefined && expectedOutput !== '') {
-      matched = normalizeOutput(result.stdout) === normalizeOutput(expectedOutput);
+      matched = normalizeOutput(finalStdout) === normalizeOutput(expectedOutput);
       status = matched ? 'AC' : 'WA';
     }
 
@@ -259,7 +286,7 @@ export async function runCustomInput({ language, code, input, expectedOutput = n
       status,
       matched,
       elapsedMs: result.elapsedMs,
-      stdout: result.stdout,
+      stdout: finalStdout,
       stderr: result.stderr,
     };
   } finally {
@@ -267,7 +294,7 @@ export async function runCustomInput({ language, code, input, expectedOutput = n
   }
 }
 
-export async function judgeAllTests({ language, code, testCases, limits }) {
+export async function judgeAllTests({ language, code, testCases, limits, fileIo = null }) {
   const workDir = await fs.mkdtemp(path.join(os.tmpdir(), 'usaco-judge-'));
   try {
     const prepared = await prepareExecution(language, code, workDir);
@@ -296,11 +323,14 @@ export async function judgeAllTests({ language, code, testCases, limits }) {
     let firstFailure = null;
 
     for (const tc of testCases) {
+      await prepareFileIo(workDir, fileIo, tc.input);
       const execResult = await runProcess(prepared.command, prepared.args, {
         cwd: workDir,
         input: tc.input,
         timeoutMs,
       });
+
+      const finalStdout = await resolveProgramOutput(workDir, fileIo, execResult.stdout);
 
       let status = 'AC';
       if (execResult.timedOut) {
@@ -309,7 +339,7 @@ export async function judgeAllTests({ language, code, testCases, limits }) {
         status = 'OLE';
       } else if (execResult.code !== 0) {
         status = 'RE';
-      } else if (normalizeOutput(execResult.stdout) !== normalizeOutput(tc.expected)) {
+      } else if (normalizeOutput(finalStdout) !== normalizeOutput(tc.expected)) {
         status = 'WA';
       }
 
@@ -327,7 +357,7 @@ export async function judgeAllTests({ language, code, testCases, limits }) {
         elapsedMs,
         inputPreview: truncatePreview(tc.input, 450),
         expectedPreview: truncatePreview(tc.expected, 450),
-        actualPreview: truncatePreview(execResult.stdout, 450),
+        actualPreview: truncatePreview(finalStdout, 450),
         stderr: execResult.stderr ? truncatePreview(execResult.stderr, 450).text : '',
       });
     }

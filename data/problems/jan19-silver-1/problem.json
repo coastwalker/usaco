@@ -1,0 +1,85 @@
+{
+  "id": "jan19-silver-1",
+  "order": 14,
+  "cpid": 894,
+  "contest": "USACO 2019 January Contest",
+  "division": "Silver",
+  "number": 1,
+  "title": "Grass Planting",
+  "difficulty": "Normal",
+  "recommendedTag": "Day 7 Bonus — Silver-Bridge (Trees)",
+  "fileIo": {
+    "in": "planting.in",
+    "out": "planting.out"
+  },
+  "sourceUrl": "https://usaco.org/index.php?page=viewproblem2&cpid=894",
+  "resultsUrl": "https://usaco.org/index.php?page=jan19results",
+  "editorialUrl": "https://usaco.org/current/data/sol_planting_silver_jan19.html",
+  "guideModule": "Introduction to Graphs",
+  "guideUrl": "https://usaco.guide/bronze/intro-graphs",
+  "credits": "Dhruv Rohatgi",
+  "limits": {
+    "timeLimitCppMs": 2000,
+    "timeLimitPythonMs": 4000,
+    "timeLimitJavaMs": 4000,
+    "memoryLimitMb": 256
+  },
+  "tags": ["Trees", "Graphs", "Degree Counting"],
+  "whyItMatters": "Bonus Silver-Bridge Challenge (Trees & Degree Counting): Given a tree of N ≤ 10⁵ fields where neither adjacent fields nor distance-2 fields (sharing a common neighbor) can have the same grass type, proving why the minimum number of grass types needed is simply max_degree + 1 in O(N) time builds true Silver-level graph intuition!",
+  "statement": {
+    "paragraphs": [
+      "It's the time of year for Farmer John to plant grass in all of his fields. The entire farm consists of N fields (1 ≤ N ≤ 10⁵), conveniently numbered 1…N and conveniently connected by N − 1 bidirectional pathways in such a way that every field can reach every other field via some collection of pathways.",
+      "Farmer John can potentially plant a different type of grass in each field, but he wants to minimize the number of grass types he uses in total, since the more types of grass he uses, the more expense he incurs.",
+      "Unfortunately, his cows have grown rather snobbish about their selection of grass on the farm. If the same grass type is planted in two adjacent fields (directly connected by a pathway) or even two nearly-adjacent fields (both directly connected to a common field with pathways), then the cows will complain about lack of variety in their dining options.",
+      "Please help Farmer John determine the minimum number of types of grass he needs for his entire farm."
+    ],
+    "inputFormat": [
+      "The first line of input contains N.",
+      "Each of the remaining N − 1 lines describes a bidirectional pathway in terms of the two fields it connects.",
+      "Note: Both legacy USACO file I/O (planting.in / planting.out) and standard I/O (stdin / stdout) are supported in this arena."
+    ],
+    "outputFormat": [
+      "Print the minimum number of types of grass that Farmer John needs to use."
+    ],
+    "sampleInput": "4\n1 2\n4 3\n2 3",
+    "sampleOutput": "3",
+    "sampleExplanation": [
+      {
+        "title": "Sample Analysis",
+        "detail": "The 4 fields form a path 1 — 2 — 3 — 4. Field 2 has degree 2 (connected to 1 and 3), so fields {1, 2, 3} must all have pairwise distinct grass types (3 types). Planting types A - B - C - A satisfies all adjacent and distance-2 constraints.",
+        "steps": "Path: 1 — 2 — 3 — 4  |  max_degree = deg(2) = 2  →  max_degree + 1 = 3"
+      }
+    ]
+  },
+  "hints": [
+    {
+      "level": 1,
+      "title": "Find a Lower Bound Around Any Vertex v",
+      "body": "Pick any field v with degree d (meaning v has d direct neighbors). Consider the set of d + 1 fields consisting of v itself AND all d of its neighbors. Every pair of fields in this set is either adjacent (v and a neighbor) or distance-2 apart (two neighbors sharing v)! So all d + 1 of them MUST have pairwise distinct grass types!"
+    },
+    {
+      "level": 2,
+      "title": "Why max_degree + 1 Is Always Sufficient on a Tree",
+      "body": "The graph has N vertices and N − 1 edges and is connected — so it is a TREE! Root the tree at field 1 and color top-down (BFS/DFS): when coloring the children of node u, only u's color and u's parent's color are forbidden (at most 2 colors), and we assign distinct remaining colors to all children of u. Since deg(u) + 1 ≤ max_degree + 1, we NEVER run out of colors!"
+    },
+    {
+      "level": 3,
+      "title": "O(N) Degree Counting Implementation",
+      "body": "You don't even need to run BFS/DFS! Just maintain an integer array deg[1..N], increment deg[u] and deg[v] for each of the N − 1 pathways, and output max(deg) + 1. (Works even for N = 1 where max_degree = 0 gives 1!). Remember on usaco.org (2019 contest), I/O uses planting.in and planting.out."
+    }
+  ],
+  "editorial": {
+    "summary": "Around any node v of degree d, v and its d neighbors are all within distance ≤ 2 of each other, requiring at least d + 1 colors. Because the farm is a tree, rooting the tree and greedily coloring children top-down always succeeds with D + 1 colors where D = max_v deg(v). Simply count vertex degrees and output max(deg) + 1.",
+    "complexity": "Time: O(N)  |  Space: O(N)",
+    "solutions": {
+      "python": "import os\nimport sys\n\ndef solve():\n    if os.path.exists(\"planting.in\"):\n        data = list(map(int, open(\"planting.in\").read().split()))\n    else:\n        data = list(map(int, sys.stdin.read().split()))\n    n = data[0]\n    deg = [0] * (n + 1)\n    idx = 1\n    for _ in range(n - 1):\n        u, v = data[idx], data[idx + 1]\n        idx += 2\n        deg[u] += 1\n        deg[v] += 1\n    ans = max(deg) + 1\n    if os.path.exists(\"planting.in\"):\n        with open(\"planting.out\", \"w\") as f:\n            f.write(f\"{ans}\\n\")\n    else:\n        print(ans)\n\nif __name__ == \"__main__\":\n    solve()\n",
+      "cpp": "#include <algorithm>\n#include <cstdio>\n#include <iostream>\n#include <vector>\nusing namespace std;\n\nint main() {\n    ios::sync_with_stdio(false);\n    cin.tie(nullptr);\n    if (FILE* f = fopen(\"planting.in\", \"r\")) {\n        fclose(f);\n        freopen(\"planting.in\", \"r\", stdin);\n        freopen(\"planting.out\", \"w\", stdout);\n    }\n    int n;\n    cin >> n;\n    vector<int> deg(n + 1, 0);\n    int maxDeg = 0;\n    for (int i = 0; i < n - 1; i++) {\n        int u, v;\n        cin >> u >> v;\n        maxDeg = max(maxDeg, ++deg[u]);\n        maxDeg = max(maxDeg, ++deg[v]);\n    }\n    cout << maxDeg + 1 << '\\n';\n    return 0;\n}\n",
+      "java": "import java.io.*;\nimport java.util.*;\n\npublic class Main {\n    public static void main(String[] args) throws Exception {\n        File inFile = new File(\"planting.in\");\n        BufferedReader br = inFile.exists()\n            ? new BufferedReader(new FileReader(inFile))\n            : new BufferedReader(new InputStreamReader(System.in));\n        int n = Integer.parseInt(br.readLine().trim());\n        int[] deg = new int[n + 1];\n        int maxDeg = 0;\n        for (int i = 0; i < n - 1; i++) {\n            StringTokenizer st = new StringTokenizer(br.readLine());\n            int u = Integer.parseInt(st.nextToken());\n            int v = Integer.parseInt(st.nextToken());\n            maxDeg = Math.max(maxDeg, ++deg[u]);\n            maxDeg = Math.max(maxDeg, ++deg[v]);\n        }\n        int ans = maxDeg + 1;\n        if (inFile.exists()) {\n            try (PrintWriter pw = new PrintWriter(new FileWriter(\"planting.out\"))) {\n                pw.println(ans);\n            }\n        } else {\n            System.out.println(ans);\n        }\n    }\n}\n"
+    }
+  },
+  "starterCode": {
+    "python": "import sys\n\ndef solve():\n    # Tip: Both stdin/stdout and planting.in / planting.out are supported!\n    data = list(map(int, sys.stdin.read().split()))\n    if not data:\n        return\n    n = data[0]\n    edges = []\n    idx = 1\n    for _ in range(n - 1):\n        edges.append((data[idx], data[idx + 1]))\n        idx += 2\n    \n    # Write your O(N) tree degree solution here\n    print(0)\n\nif __name__ == \"__main__\":\n    solve()\n",
+    "cpp": "#include <algorithm>\n#include <iostream>\n#include <vector>\nusing namespace std;\n\nint main() {\n    ios::sync_with_stdio(false);\n    cin.tie(nullptr);\n    // Tip: Both cin/cout and planting.in / planting.out are supported!\n    int n;\n    if (!(cin >> n)) return 0;\n    for (int i = 0; i < n - 1; i++) {\n        int u, v;\n        cin >> u >> v;\n    }\n    \n    // Write your O(N) tree degree solution here\n    cout << 0 << '\\n';\n    return 0;\n}\n",
+    "java": "import java.io.*;\nimport java.util.*;\n\npublic class Main {\n    public static void main(String[] args) throws Exception {\n        // Tip: Both System.in/out and planting.in / planting.out are supported!\n        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));\n        String firstLine = br.readLine();\n        if (firstLine == null) return;\n        int n = Integer.parseInt(firstLine.trim());\n        for (int i = 0; i < n - 1; i++) {\n            StringTokenizer st = new StringTokenizer(br.readLine());\n            int u = Integer.parseInt(st.nextToken());\n            int v = Integer.parseInt(st.nextToken());\n        }\n        \n        // Write your O(N) tree degree solution here\n        System.out.println(0);\n    }\n}\n"
+  }
+}

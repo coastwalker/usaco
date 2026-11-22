@@ -67,6 +67,7 @@ export async function runCode({ problemId, language, code, input, expectedOutput
     input,
     expectedOutput,
     limits: problem?.limits,
+    fileIo: problem?.fileIo || null,
   });
 }
 

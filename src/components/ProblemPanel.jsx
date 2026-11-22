@@ -188,7 +188,12 @@ export default function ProblemPanel({
                   Memory: <strong>{problem.limits.memoryLimitMb} MB</strong>
                 </span>
                 <span className="limit-chip">
-                  I/O: <strong>stdin / stdout</strong>
+                  I/O:{' '}
+                  <strong>
+                    {problem.fileIo
+                      ? `${problem.fileIo.in} / .out or stdin`
+                      : 'stdin / stdout'}
+                  </strong>
                 </span>
               </div>
             </div>

@@ -51,9 +51,11 @@ app.post('/api/run', async (req, res) => {
 
   try {
     let limits = null;
+    let fileIo = null;
     if (problemId) {
       const problem = await getProblem(problemId).catch(() => null);
       limits = problem?.limits || null;
+      fileIo = problem?.fileIo || null;
     }
 
     const result = await enqueue(() =>
@@ -63,6 +65,7 @@ app.post('/api/run', async (req, res) => {
         input: String(input ?? ''),
         expectedOutput,
         limits,
+        fileIo,
       })
     );
     res.json(result);
@@ -91,6 +94,7 @@ app.post('/api/submit', async (req, res) => {
         code,
         testCases,
         limits: problem.limits,
+        fileIo: problem.fileIo || null,
       })
     );
 
