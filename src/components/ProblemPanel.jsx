@@ -130,6 +130,9 @@ export default function ProblemPanel({
                     {problem.difficulty}
                   </span>
                 )}
+                {problem.recommendedTag && (
+                  <span className="recommended-chip">{problem.recommendedTag}</span>
+                )}
               </div>
 
               <h1 className="problem-title">{problem.title}</h1>
@@ -356,6 +359,12 @@ export default function ProblemPanel({
 
         {activeTab === 'hints' && (
           <div>
+            {problem.whyItMatters && (
+              <div className="why-matters-box">
+                <div className="why-matters-title">Why This Problem Matters</div>
+                <p className="why-matters-body">{problem.whyItMatters}</p>
+              </div>
+            )}
             <p className="viz-intro" style={{ marginBottom: 14 }}>
               Stuck on <strong>{problem.title}</strong>? Reveal one hint at a time so you can
               still discover the key insight yourself!

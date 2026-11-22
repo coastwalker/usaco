@@ -1,0 +1,86 @@
+{
+  "id": "feb23-bronze-3",
+  "order": 12,
+  "cpid": 1301,
+  "contest": "USACO 2023 February Contest",
+  "division": "Bronze",
+  "number": 3,
+  "title": "Watching Mooloo",
+  "difficulty": "Normal",
+  "recommendedTag": "Day 6 — Casework & Greedy Algorithms",
+  "sourceUrl": "https://usaco.org/index.php?page=viewproblem2&cpid=1301",
+  "resultsUrl": "https://usaco.org/index.php?page=feb23results",
+  "editorialUrl": "https://usaco.org/current/data/sol_prob3_bronze_feb23.html",
+  "guideModule": "Introduction to Greedy Algorithms",
+  "guideUrl": "https://usaco.guide/bronze/intro-greedy",
+  "credits": "Danny Mittal",
+  "limits": {
+    "timeLimitCppMs": 2000,
+    "timeLimitPythonMs": 4000,
+    "timeLimitJavaMs": 4000,
+    "memoryLimitMb": 256
+  },
+  "tags": ["Greedy", "Casework", "64-bit Integers"],
+  "whyItMatters": "After mastering Recursion/Backtracking (Days 1–2), Simulation (Day 3), Basic Complete Search (Day 4), and Sorting/Sets (Day 5), this problem transitions into Greedy Algorithms & Casework. At each scheduled day dᵢ, Bessie faces a clean local binary choice: extend her existing subscription from dᵢ₋₁ through dᵢ, or let it expire and start a fresh 1-day subscription on dᵢ. Proving why this local greedy choice is globally optimal is a foundational Bronze-to-Silver skill.",
+  "statement": {
+    "paragraphs": [
+      "Bessie likes to watch shows on Mooloo. Because Bessie is a busy cow, she has planned a schedule for the next N (1 ≤ N ≤ 10⁵) days that she will watch Mooloo. Because Mooloo is a paid subscription service, she now needs to decide how to minimize the amount of money she needs to pay.",
+      "Mooloo has an interesting subscription system: it costs d + K (1 ≤ K ≤ 10⁹) moonies to subscribe to Mooloo for d consecutive days. You can start a subscription at any time, and you can start a new subscription as many times as you desire if your current subscription expires. Given this, figure out the minimum amount of moonies Bessie needs to pay to fulfill her schedule."
+    ],
+    "inputFormat": [
+      "The first line contains integers N and K.",
+      "The second line contains N integers describing the days Bessie will watch Mooloo in strictly increasing order: 1 ≤ d₁ < d₂ < … < dₙ ≤ 10¹⁴."
+    ],
+    "outputFormat": [
+      "Print a single integer: the minimum total number of moonies Bessie needs to pay so every scheduled day dᵢ is covered by an active subscription.",
+      "Note that the large size of integers involved in this problem requires 64-bit integer data types (e.g., \"long\" in Java, \"long long\" in C/C++)."
+    ],
+    "sampleInput": "2 4\n7 9",
+    "sampleOutput": "7",
+    "additionalSamples": [
+      {
+        "input": "2 3\n1 10",
+        "output": "8",
+        "explanation": "Bessie buys a 1-day subscription on day 1 for 1 + 3 = 4 moonies, and another 1-day subscription on day 10 for 1 + 3 = 4 moonies, spending 8 moonies in total (cheaper than a 10-day subscription costing 10 + 3 = 13)."
+      }
+    ],
+    "sampleExplanation": [
+      {
+        "title": "Sample 1 Analysis",
+        "detail": "Bessie buys a single 3-day subscription covering days 7, 8, and 9, spending d + K = 3 + 4 = 7 moonies (cheaper than two separate 1-day subscriptions costing 5 + 5 = 10).",
+        "steps": "Day 7: start (1 + 4 = 5)  →  Day 9: min(9 − 7, 1 + 4) = min(2, 5) = 2  →  5 + 2 = 7"
+      }
+    ]
+  },
+  "hints": [
+    {
+      "level": 1,
+      "title": "Constraint & Cost Structure Analysis",
+      "body": "Notice that dₙ can be up to 10¹⁴ and K up to 10⁹, so simulating day-by-day is impossible, and you MUST use 64-bit integers (long in Java, long long in C++). Since N ≤ 10⁵ and the days d₁ < d₂ < … < dₙ are already sorted, aim for an O(N) single-pass greedy algorithm."
+    },
+    {
+      "level": 2,
+      "title": "The Local Greedy Decision",
+      "body": "On the very first day d₁, Bessie must buy a subscription costing 1 + K moonies. For each subsequent day dᵢ (i ≥ 2), compare two options: Option A (Extend) keeps the previous subscription active from dᵢ₋₁ through dᵢ, adding (dᵢ − dᵢ₋₁) days for (dᵢ − dᵢ₋₁) extra moonies; Option B (New Subscription) lets the previous subscription end on dᵢ₋₁ and starts a fresh 1-day subscription on dᵢ for (1 + K) moonies. Simply add min(dᵢ − dᵢ₋₁, 1 + K)! Whether you extended or started fresh, the state going into dᵢ₊₁ is identical (an active subscription ending on day dᵢ), so picking the cheaper local option has zero future penalty."
+    },
+    {
+      "level": 3,
+      "title": "Java / Python Implementation & Edge-Case Tips",
+      "body": "64-Bit Overflow (Java/C++): Both dᵢ (up to 10¹⁴) and totalCost (up to ~10¹⁴) overflow 32-bit int! Parse K and every dᵢ with Long.parseLong(...) in Java (or long long in C++) and store totalCost as a 64-bit integer. Standard Fast I/O: Use BufferedReader + StringTokenizer in Java or sys.stdin.read().split() in Python to read N = 10⁵ integers smoothly."
+    }
+  ],
+  "editorial": {
+    "summary": "Start a 1-day subscription on d₁ for 1 + K moonies. For each subsequent scheduled day dᵢ, either extend the current subscription across the gap for (dᵢ − dᵢ₋₁) moonies or buy a new 1-day subscription for (1 + K) moonies — adding min(dᵢ − dᵢ₋₁, 1 + K) to a 64-bit running total.",
+    "complexity": "Time: O(N)  |  Space: O(N) (or O(1) streaming)",
+    "solutions": {
+      "python": "import sys\n\ndef solve():\n    data = list(map(int, sys.stdin.read().split()))\n    n, k = data[0], data[1]\n    days = data[2:2 + n]\n    total = k + 1\n    for i in range(1, n):\n        extend_cost = days[i] - days[i - 1]\n        new_cost = k + 1\n        total += min(extend_cost, new_cost)\n    print(total)\n\nif __name__ == \"__main__\":\n    solve()\n",
+      "cpp": "#include <algorithm>\n#include <iostream>\n#include <vector>\nusing namespace std;\n\nint main() {\n    ios::sync_with_stdio(false);\n    cin.tie(nullptr);\n    int n;\n    long long k;\n    cin >> n >> k;\n    vector<long long> d(n);\n    for (int i = 0; i < n; i++) cin >> d[i];\n    long long total = k + 1;\n    for (int i = 1; i < n; i++) {\n        long long extendCost = d[i] - d[i - 1];\n        long long newCost = k + 1;\n        total += min(extendCost, newCost);\n    }\n    cout << total << '\\n';\n    return 0;\n}\n",
+      "java": "import java.io.*;\nimport java.util.*;\n\npublic class Main {\n    public static void main(String[] args) throws Exception {\n        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));\n        StringTokenizer st = new StringTokenizer(br.readLine());\n        int n = Integer.parseInt(st.nextToken());\n        long k = Long.parseLong(st.nextToken());\n        st = new StringTokenizer(br.readLine());\n        long[] d = new long[n];\n        for (int i = 0; i < n; i++) {\n            d[i] = Long.parseLong(st.nextToken());\n        }\n        long totalCost = k + 1;\n        for (int i = 1; i < n; i++) {\n            long extendCost = d[i] - d[i - 1];\n            long newCost = 1 + k;\n            totalCost += Math.min(extendCost, newCost);\n        }\n        System.out.println(totalCost);\n    }\n}\n"
+    }
+  },
+  "starterCode": {
+    "python": "import sys\n\ndef solve():\n    data = list(map(int, sys.stdin.read().split()))\n    if not data:\n        return\n    n, k = data[0], data[1]\n    days = data[2:2 + n]\n    \n    # Write your O(N) greedy solution here\n    print(0)\n\nif __name__ == \"__main__\":\n    solve()\n",
+    "cpp": "#include <algorithm>\n#include <iostream>\n#include <vector>\nusing namespace std;\n\nint main() {\n    ios::sync_with_stdio(false);\n    cin.tie(nullptr);\n    \n    int n;\n    long long k;\n    if (!(cin >> n >> k)) return 0;\n    vector<long long> d(n);\n    for (int i = 0; i < n; i++) cin >> d[i];\n    \n    // Write your O(N) greedy solution here (use 64-bit long long!)\n    cout << 0 << '\\n';\n    return 0;\n}\n",
+    "java": "import java.io.*;\nimport java.util.*;\n\npublic class Main {\n    public static void main(String[] args) throws Exception {\n        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));\n        String firstLine = br.readLine();\n        if (firstLine == null) return;\n        StringTokenizer st = new StringTokenizer(firstLine);\n        int n = Integer.parseInt(st.nextToken());\n        long k = Long.parseLong(st.nextToken());\n        st = new StringTokenizer(br.readLine());\n        long[] d = new long[n];\n        for (int i = 0; i < n; i++) {\n            d[i] = Long.parseLong(st.nextToken());\n        }\n        \n        // Write your O(N) greedy solution here (use 64-bit long!)\n        System.out.println(0L);\n    }\n}\n"
+  }
+}

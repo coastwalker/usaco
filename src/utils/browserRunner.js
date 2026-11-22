@@ -161,24 +161,52 @@ async function runPythonInBrowser(code, input, timeoutMs = 4000) {
 // Wandbox Compiler Runner (C++17 & Java 21 on GitHub Pages)
 // ============================================================================
 
+const LARGE_STDIN_THRESHOLD = 750000;
+
+async function gzipToBase64(str) {
+  const bytes = new TextEncoder().encode(str);
+  const cs = new CompressionStream('gzip');
+  const writer = cs.writable.getWriter();
+  writer.write(bytes);
+  writer.close();
+  const compressed = new Uint8Array(await new Response(cs.readable).arrayBuffer());
+  let binary = '';
+  const chunk = 0x8000;
+  for (let i = 0; i < compressed.length; i += chunk) {
+    binary += String.fromCharCode(...compressed.subarray(i, i + chunk));
+  }
+  return btoa(binary);
+}
+
 async function runWandbox(language, code, input) {
   const start = performance.now();
+  const useCompressedStdin =
+    input && input.length > LARGE_STDIN_THRESHOLD && typeof CompressionStream !== 'undefined';
+  const stdinPayload = useCompressedStdin ? await gzipToBase64(input) : input;
   let payload;
 
   if (language === 'cpp') {
+    const cppBoot = useCompressedStdin
+      ? '#include <cstdio>\n#include <unistd.h>\nnamespace { struct __UsacoIn { __UsacoIn() { FILE* p = popen("base64 -d | gzip -dc", "r"); if (p) { dup2(fileno(p), 0); } } } __usaco_in_init; }\n'
+      : '';
     payload = {
       compiler: 'gcc-13.2.0',
       options: 'c++17,optimize',
-      code,
-      stdin: input,
+      code: cppBoot + code,
+      stdin: stdinPayload,
     };
   } else if (language === 'java') {
     // Wandbox saves Java source as prog.java, so strip "public " from the top-level class
-    const adaptedCode = code.replace(/\bpublic\s+class\s+/g, 'class ');
+    let adaptedCode = code.replace(/\bpublic\s+class\s+/g, 'class ');
+    if (useCompressedStdin) {
+      adaptedCode =
+        adaptedCode.replace(/\bclass\s+Main\b/, 'class __UsacoUserMain') +
+        '\nclass Main { public static void main(String[] a) throws Exception { System.setIn(new java.util.zip.GZIPInputStream(java.util.Base64.getDecoder().wrap(System.in))); __UsacoUserMain.main(a); } }\n';
+    }
     payload = {
       compiler: 'openjdk-jdk-21+35',
       code: adaptedCode,
-      stdin: input,
+      stdin: stdinPayload,
     };
   } else {
     throw new Error(`Unsupported language: ${language}`);

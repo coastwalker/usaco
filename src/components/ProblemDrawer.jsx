@@ -130,6 +130,9 @@ export default function ProblemDrawer({
                     <span className={`diff-badge diff-${(p.difficulty || 'Normal').toLowerCase()}`}>
                       {p.difficulty || 'Normal'}
                     </span>
+                    {p.recommendedTag && (
+                      <span className="recommended-chip">{p.recommendedTag}</span>
+                    )}
                   </div>
 
                   <div className="drawer-item-meta">

@@ -25,6 +25,7 @@ export async function listProblems() {
         number: data.number,
         title: data.title,
         difficulty: data.difficulty || 'Normal',
+        recommendedTag: data.recommendedTag || '',
         guideModule: data.guideModule || '',
         guideUrl: data.guideUrl || '',
         sourceUrl: data.sourceUrl || '',
