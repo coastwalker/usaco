@@ -1,0 +1,90 @@
+{
+  "id": "dec13-bronze-3",
+  "order": 15,
+  "cpid": 360,
+  "contest": "USACO 2013 December Contest",
+  "division": "Bronze",
+  "number": 3,
+  "title": "Wormholes",
+  "difficulty": "Hard",
+  "recommendedTag": "Day 9 — Recursive Pairing & Cycle Detection",
+  "fileIo": {
+    "in": "wormhole.in",
+    "out": "wormhole.out"
+  },
+  "sourceUrl": "https://usaco.org/index.php?page=viewproblem2&cpid=360",
+  "resultsUrl": "https://usaco.org/index.php?page=dec13problems",
+  "editorialUrl": "https://usaco.org/current/data/sol_wormhole.html",
+  "guideModule": "Complete Search with Recursion",
+  "guideUrl": "https://usaco.guide/bronze/complete-rec",
+  "credits": "Brian Dean",
+  "limits": {
+    "timeLimitCppMs": 2000,
+    "timeLimitPythonMs": 4000,
+    "timeLimitJavaMs": 4000,
+    "memoryLimitMb": 256
+  },
+  "tags": ["Recursion", "Backtracking", "Functional Graph", "Cycle Detection"],
+  "whyItMatters": "Wormholes cycles back to Complete Search with Recursion at a higher level: instead of generating subsets (2ⁿ) or permutations (N!), you must generate all unordered perfect matchings of N ≤ 12 points without duplicates! Always pairing the smallest unpaired index reduces the search space from 12! = 479,001,600 down to 11!! = 11 × 9 × 7 × 5 × 3 × 1 = 10,395 matchings, combined with clean O(N²) cycle detection on a functional graph.",
+  "statement": {
+    "paragraphs": [
+      "Farmer John's hobby of conducting high-energy physics experiments on weekends has backfired, causing N wormholes (2 ≤ N ≤ 12, N even) to materialize on his farm, each located at a distinct point on the 2D map of his farm.",
+      "According to his calculations, Farmer John knows that his wormholes will form N/2 connected pairs. For example, if wormholes A and B are connected as a pair, then any object entering wormhole A will exit wormhole B moving in the same direction, and any object entering wormhole B will similarly exit from wormhole A moving in the same direction.",
+      "This can have rather unpleasant consequences. For example, suppose there are two paired wormholes A at (0, 0) and B at (1, 0), and that Bessie the cow starts from position (1/2, 0) moving in the +x direction. Bessie will enter wormhole B, exit from A, then enter B again, and so on, getting trapped in an infinite cycle!",
+      "Farmer John knows the exact location of each wormhole on his farm. He knows that Bessie the cow always walks in the +x direction, although he does not remember where Bessie is currently located. Please help Farmer John count the number of distinct pairings of the wormholes such that Bessie could possibly get trapped in an infinite cycle if she starts from an unlucky position."
+    ],
+    "inputFormat": [
+      "Line 1: The number of wormholes, N (2 ≤ N ≤ 12, N even).",
+      "Lines 2..1+N: Each line contains two space-separated integers describing the (x, y) coordinates of a single wormhole. Each coordinate is in the range 0…1,000,000,000.",
+      "Note: Both legacy USACO file I/O (wormhole.in / wormhole.out) and standard I/O (stdin / stdout) are supported in this arena."
+    ],
+    "outputFormat": [
+      "Line 1: The number of distinct pairings of wormholes such that Bessie could conceivably get stuck in a cycle walking from some starting point in the +x direction."
+    ],
+    "sampleInput": "4\n0 0\n1 0\n1 1\n0 1",
+    "sampleOutput": "2",
+    "sampleExplanation": [
+      {
+        "title": "Sample Analysis (4 Corners of a Unit Square)",
+        "detail": "Label wormholes 1:(0,0), 2:(1,0), 3:(1,1), 4:(0,1). There are 3!! = 3 distinct pairings in total:",
+        "steps": "(1-2, 3-4) → cycles!  |  (1-3, 2-4) → cycles!  |  (1-4, 2-3) → safe (escapes +x)  ⇒  2 pairings"
+      }
+    ]
+  },
+  "hints": [
+    {
+      "level": 1,
+      "title": "Precompute next_on_right[i] (Walking in +x)",
+      "body": "Coordinates go up to 10⁹, so never simulate unit steps! Whenever Bessie exits wormhole p moving in the +x direction, which wormhole does she hit next? Either she walks off to +∞ forever, OR she hits the single wormhole q with y[q] == y[p] and the SMALLEST x[q] > x[p]! Precompute next_on_right[1..N] (using 0 if none exists) in O(N²) before recursion."
+    },
+    {
+      "level": 2,
+      "title": "Canonical Recursive Pairing: 11!! = 10,395 Instead of 12!",
+      "body": "To avoid counting the same pairing in different orders (like {(1,2),(3,4)} vs {(3,4),(1,2)}), ALWAYS find the SMALLEST unpaired index i first! If no unpaired i exists (i > N), all wormholes are paired — test for a cycle! Otherwise, loop j from i + 1 to N: if partner[j] == 0, set partner[i] = j and partner[j] = i, add solve(), and reset partner[i] = partner[j] = 0. This visits each unordered matching once: 11 × 9 × 7 × 5 × 3 × 1 = 10,395!"
+    },
+    {
+      "level": 3,
+      "title": "O(N²) Cycle Detection on a Functional Graph",
+      "body": "For a fixed pairing, every wormhole pos has a deterministic next state: teleport to partner[pos], then walk +x to next_on_right[partner[pos]]. Test starting at every wormhole start = 1..N and advance pos = next_on_right[partner[pos]] exactly N times (using 0 as the 'escaped to +∞' state with partner[0] = 0, next_on_right[0] = 0). By the Pigeonhole Principle, if pos != 0 after N steps, Bessie visited some wormhole twice and is in a cycle!"
+    },
+    {
+      "level": 4,
+      "title": "Complexity & File I/O Check",
+      "body": "Total operations at N = 12: 10,395 pairings × (12 starts × 12 steps) ≈ 1.5 × 10⁶ simple array lookups — under 5 ms in C++/Java and ~120 ms in Python! Remember on usaco.org (2013 contest), read from wormhole.in and write to wormhole.out."
+    }
+  ],
+  "editorial": {
+    "summary": "Precompute next_on_right[i] for each wormhole (1-indexed, 0 if none). Recursively generate all (N − 1)!! canonical pairings by always matching the lowest-numbered free wormhole i with each free j > i. At each complete pairing, check whether starting at any wormhole s and applying pos = next_on_right[partner[pos]] N times remains non-zero.",
+    "complexity": "Time: O((N − 1)!! · N²) ≤ 1.5 × 10⁶ ops  |  Space: O(N)",
+    "solutions": {
+      "python": "import os\nimport sys\n\ndef solve():\n    if os.path.exists(\"wormhole.in\"):\n        data = list(map(int, open(\"wormhole.in\").read().split()))\n    else:\n        data = list(map(int, sys.stdin.read().split()))\n    n = data[0]\n    x = [0] * (n + 1)\n    y = [0] * (n + 1)\n    for i in range(1, n + 1):\n        x[i] = data[2 * i - 1]\n        y[i] = data[2 * i]\n\n    next_right = [0] * (n + 1)\n    for i in range(1, n + 1):\n        for j in range(1, n + 1):\n            if y[j] == y[i] and x[j] > x[i]:\n                if next_right[i] == 0 or x[j] < x[next_right[i]]:\n                    next_right[i] = j\n\n    partner = [0] * (n + 1)\n\n    def has_cycle():\n        for start in range(1, n + 1):\n            pos = start\n            for _ in range(n):\n                pos = next_right[partner[pos]]\n                if pos == 0:\n                    break\n            if pos != 0:\n                return True\n        return False\n\n    def dfs():\n        first = 0\n        for i in range(1, n + 1):\n            if partner[i] == 0:\n                first = i\n                break\n        if first == 0:\n            return 1 if has_cycle() else 0\n        total = 0\n        for j in range(first + 1, n + 1):\n            if partner[j] == 0:\n                partner[first] = j\n                partner[j] = first\n                total += dfs()\n                partner[first] = 0\n                partner[j] = 0\n        return total\n\n    ans = dfs()\n    if os.path.exists(\"wormhole.in\"):\n        with open(\"wormhole.out\", \"w\") as f:\n            f.write(f\"{ans}\\n\")\n    else:\n        print(ans)\n\nif __name__ == \"__main__\":\n    solve()\n",
+      "cpp": "#include <cstdio>\n#include <iostream>\nusing namespace std;\n\nint N;\nlong long X[13], Y[13];\nint partner[13], nextRight[13];\n\nbool hasCycle() {\n    for (int start = 1; start <= N; start++) {\n        int pos = start;\n        for (int step = 0; step < N; step++) {\n            pos = nextRight[partner[pos]];\n        }\n        if (pos != 0) return true;\n    }\n    return false;\n}\n\nint countPairings() {\n    int i = 1;\n    while (i <= N && partner[i] != 0) i++;\n    if (i > N) return hasCycle() ? 1 : 0;\n    int total = 0;\n    for (int j = i + 1; j <= N; j++) {\n        if (partner[j] == 0) {\n            partner[i] = j;\n            partner[j] = i;\n            total += countPairings();\n            partner[i] = partner[j] = 0;\n        }\n    }\n    return total;\n}\n\nint main() {\n    if (FILE* f = fopen(\"wormhole.in\", \"r\")) {\n        fclose(f);\n        freopen(\"wormhole.in\", \"r\", stdin);\n        freopen(\"wormhole.out\", \"w\", stdout);\n    }\n    cin >> N;\n    for (int i = 1; i <= N; i++) cin >> X[i] >> Y[i];\n    for (int i = 1; i <= N; i++) {\n        for (int j = 1; j <= N; j++) {\n            if (Y[j] == Y[i] && X[j] > X[i]) {\n                if (nextRight[i] == 0 || X[j] < X[nextRight[i]]) {\n                    nextRight[i] = j;\n                }\n            }\n        }\n    }\n    cout << countPairings() << '\\n';\n    return 0;\n}\n",
+      "java": "import java.io.*;\nimport java.util.*;\n\npublic class Main {\n    static int N;\n    static long[] X = new long[13], Y = new long[13];\n    static int[] partner = new int[13], nextRight = new int[13];\n\n    static boolean hasCycle() {\n        for (int start = 1; start <= N; start++) {\n            int pos = start;\n            for (int step = 0; step < N; step++) {\n                pos = nextRight[partner[pos]];\n            }\n            if (pos != 0) return true;\n        }\n        return false;\n    }\n\n    static int dfs() {\n        int first = 1;\n        while (first <= N && partner[first] != 0) first++;\n        if (first > N) return hasCycle() ? 1 : 0;\n        int total = 0;\n        for (int j = first + 1; j <= N; j++) {\n            if (partner[j] == 0) {\n                partner[first] = j;\n                partner[j] = first;\n                total += dfs();\n                partner[first] = partner[j] = 0;\n            }\n        }\n        return total;\n    }\n\n    public static void main(String[] args) throws Exception {\n        File inFile = new File(\"wormhole.in\");\n        Scanner sc = inFile.exists() ? new Scanner(inFile) : new Scanner(System.in);\n        N = sc.nextInt();\n        for (int i = 1; i <= N; i++) {\n            X[i] = sc.nextLong();\n            Y[i] = sc.nextLong();\n        }\n        for (int i = 1; i <= N; i++) {\n            for (int j = 1; j <= N; j++) {\n                if (Y[j] == Y[i] && X[j] > X[i]) {\n                    if (nextRight[i] == 0 || X[j] < X[nextRight[i]]) {\n                        nextRight[i] = j;\n                    }\n                }\n            }\n        }\n        int ans = dfs();\n        if (inFile.exists()) {\n            try (PrintWriter pw = new PrintWriter(new FileWriter(\"wormhole.out\"))) {\n                pw.println(ans);\n            }\n        } else {\n            System.out.println(ans);\n        }\n    }\n}\n"
+    }
+  },
+  "starterCode": {
+    "python": "import sys\n\ndef solve():\n    # Tip: Both stdin/stdout and wormhole.in / wormhole.out are supported!\n    data = list(map(int, sys.stdin.read().split()))\n    if not data:\n        return\n    n = data[0]\n    coords = [(data[2 * i + 1], data[2 * i + 2]) for i in range(n)]\n    \n    # Write your recursive pairing + cycle detection solution here\n    print(0)\n\nif __name__ == \"__main__\":\n    solve()\n",
+    "cpp": "#include <iostream>\n#include <vector>\nusing namespace std;\n\nint main() {\n    // Tip: Both cin/cout and wormhole.in / wormhole.out are supported!\n    int n;\n    if (!(cin >> n)) return 0;\n    vector<long long> x(n + 1), y(n + 1);\n    for (int i = 1; i <= n; i++) cin >> x[i] >> y[i];\n    \n    // Write your recursive pairing + cycle detection solution here\n    cout << 0 << '\\n';\n    return 0;\n}\n",
+    "java": "import java.io.*;\nimport java.util.*;\n\npublic class Main {\n    public static void main(String[] args) throws Exception {\n        // Tip: Both System.in/out and wormhole.in / wormhole.out are supported!\n        Scanner sc = new Scanner(System.in);\n        if (!sc.hasNextInt()) return;\n        int n = sc.nextInt();\n        long[] x = new long[n + 1], y = new long[n + 1];\n        for (int i = 1; i <= n; i++) {\n            x[i] = sc.nextLong();\n            y[i] = sc.nextLong();\n        }\n        \n        // Write your recursive pairing + cycle detection solution here\n        System.out.println(0);\n    }\n}\n"
+  }
+}
