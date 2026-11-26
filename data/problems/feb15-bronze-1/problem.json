@@ -1,0 +1,89 @@
+{
+  "id": "feb15-bronze-1",
+  "order": 16,
+  "cpid": 526,
+  "contest": "USACO 2015 February Contest",
+  "division": "Bronze",
+  "number": 1,
+  "title": "Censoring",
+  "difficulty": "Normal",
+  "recommendedTag": "Day 10 — Stack-Based String Simulation",
+  "fileIo": {
+    "in": "censor.in",
+    "out": "censor.out"
+  },
+  "sourceUrl": "https://usaco.org/index.php?page=viewproblem2&cpid=526",
+  "resultsUrl": "https://usaco.org/index.php?page=feb15results",
+  "editorialUrl": "https://usaco.org/current/data/sol_censor_bronze.html",
+  "guideModule": "Simulation",
+  "guideUrl": "https://usaco.guide/bronze/simulation",
+  "credits": "Mark Gordon",
+  "limits": {
+    "timeLimitCppMs": 2000,
+    "timeLimitPythonMs": 4000,
+    "timeLimitJavaMs": 4000,
+    "memoryLimitMb": 256
+  },
+  "tags": ["Simulation", "Strings", "Stack"],
+  "whyItMatters": "Censoring revisits the Simulation module at N = 10⁶ scale: naively calling S.find(T) and S.erase(...) in a loop takes O(|S|²) time and times out when deletions cascade (like 'mmmooo' removing 'moo' → 'moo' → ''). Building the output character-by-character on a stack / StringBuilder and checking only the suffix of length |T| reduces the runtime to O(|S| · |T|)!",
+  "statement": {
+    "paragraphs": [
+      "Farmer John has purchased a subscription to Good Hooveskeeping magazine for his cows, so they have plenty of material to read while waiting around in the barn during milking sessions. Unfortunately, the latest issue contains a rather inappropriate article on how to cook the perfect steak, which FJ would rather his cows not see.",
+      "FJ has taken all of the text from the magazine to create the string S of length at most 10⁶ characters. From this, he would like to remove occurrences of a substring T of length ≤ 100 characters to censor the inappropriate content. To do this, Farmer John finds the FIRST occurrence of T in S and deletes it. He then repeats the process again, deleting the first occurrence of T again, continuing until there are no more occurrences of T in S. Note that the deletion of one occurrence might create a new occurrence of T that didn't exist before!",
+      "Please help FJ determine the final contents of S after censoring is complete."
+    ],
+    "inputFormat": [
+      "The first line contains S (|S| ≤ 10⁶).",
+      "The second line contains T (1 ≤ |T| ≤ 100, |T| ≤ |S|). All characters of S and T are lowercase letters 'a'..'z'.",
+      "Note: Both legacy USACO file I/O (censor.in / censor.out) and standard I/O (stdin / stdout) are supported in this arena."
+    ],
+    "outputFormat": [
+      "Print the string S after all deletions are complete. It is guaranteed that S will not become empty during the deletion process."
+    ],
+    "sampleInput": "whatthemomooofun\nmoo",
+    "sampleOutput": "whatthefun",
+    "sampleExplanation": [
+      {
+        "title": "Cascading Deletion Walkthrough",
+        "detail": "Deleting the first 'moo' inside 'momooo' brings 'mo' and 'o' together to form a brand-new 'moo', which is then deleted next:",
+        "steps": "whatthemo[moo]ofun  →  whatthe[moo]fun  →  whatthefun"
+      }
+    ]
+  },
+  "hints": [
+    {
+      "level": 1,
+      "title": "Why Repeated find() + replace/erase() Gets TLE",
+      "body": "Suppose S = 'm' repeated 500,000 times followed by 'oo' repeated 250,000 times, and T = 'moo'. Repeatedly scanning from the beginning or shifting characters in the middle of a 10⁶-char string takes O(|S|²) ≈ 10¹² operations!"
+    },
+    {
+      "level": 2,
+      "title": "Stream Characters onto a Stack / StringBuilder!",
+      "body": "Maintain a mutable result buffer R (a list of chars in Python, std::string in C++, or StringBuilder in Java). Append one character ch of S to R at a time. Whenever len(R) ≥ len(T) and the last len(T) characters of R equal T, pop/delete the last len(T) characters from the END of R in O(|T|) time!"
+    },
+    {
+      "level": 3,
+      "title": "Why Does This Always Delete the FIRST Occurrence?",
+      "body": "Because we check and delete immediately after appending the final character of T, R NEVER contains T anywhere earlier inside it! And when popping |T| chars from the end exposes an earlier prefix (like 'mo' waiting on the stack) followed by upcoming chars ('o' from S), the newly formed 'moo' is caught as soon as 'o' is appended!"
+    },
+    {
+      "level": 4,
+      "title": "Implementation Speed Tip for |S| = 10⁶",
+      "body": "In Python, check ch == T[-1] before slicing R[-m:] == t_list, and use del R[-m:] on a character list (never R = R[:-m] on an immutable string!). In Java, compare characters in sb.charAt(sb.length() - m + k) == T.charAt(k) and call sb.setLength(sb.length() - m)."
+    }
+  ],
+  "editorial": {
+    "summary": "Build the answer R one character at a time on a stack / mutable string buffer. After appending each character of S, if R has length ≥ |T| and its suffix of length |T| matches T, truncate the last |T| characters in O(|T|) time.",
+    "complexity": "Time: O(|S| · |T|)  |  Space: O(|S|)",
+    "solutions": {
+      "python": "import os\nimport sys\n\ndef solve():\n    if os.path.exists(\"censor.in\"):\n        tokens = open(\"censor.in\").read().split()\n    else:\n        tokens = sys.stdin.read().split()\n    s, t = tokens[0], tokens[1]\n    m = len(t)\n    t_list = list(t)\n    last_ch = t[-1]\n    stack = []\n    for ch in s:\n        stack.append(ch)\n        if ch == last_ch and len(stack) >= m and stack[-m:] == t_list:\n            del stack[-m:]\n    ans = \"\".join(stack)\n    if os.path.exists(\"censor.in\"):\n        with open(\"censor.out\", \"w\") as f:\n            f.write(ans + \"\\n\")\n    else:\n        print(ans)\n\nif __name__ == \"__main__\":\n    solve()\n",
+      "cpp": "#include <cstdio>\n#include <iostream>\n#include <string>\nusing namespace std;\n\nint main() {\n    ios::sync_with_stdio(false);\n    cin.tie(nullptr);\n    if (FILE* f = fopen(\"censor.in\", \"r\")) {\n        fclose(f);\n        freopen(\"censor.in\", \"r\", stdin);\n        freopen(\"censor.out\", \"w\", stdout);\n    }\n    string s, t;\n    cin >> s >> t;\n    string r;\n    r.reserve(s.size());\n    size_t m = t.size();\n    for (char ch : s) {\n        r.push_back(ch);\n        if (r.size() >= m && r.compare(r.size() - m, m, t) == 0) {\n            r.resize(r.size() - m);\n        }\n    }\n    cout << r << '\\n';\n    return 0;\n}\n",
+      "java": "import java.io.*;\n\npublic class Main {\n    public static void main(String[] args) throws Exception {\n        File inFile = new File(\"censor.in\");\n        BufferedReader br = inFile.exists()\n            ? new BufferedReader(new FileReader(inFile))\n            : new BufferedReader(new InputStreamReader(System.in));\n        String s = br.readLine().trim();\n        String t = br.readLine().trim();\n        int m = t.length();\n        char lastChar = t.charAt(m - 1);\n        StringBuilder sb = new StringBuilder(s.length());\n        for (int i = 0; i < s.length(); i++) {\n            char ch = s.charAt(i);\n            sb.append(ch);\n            if (ch == lastChar && sb.length() >= m) {\n                int start = sb.length() - m;\n                boolean match = true;\n                for (int k = 0; k < m; k++) {\n                    if (sb.charAt(start + k) != t.charAt(k)) {\n                        match = false;\n                        break;\n                    }\n                }\n                if (match) sb.setLength(start);\n            }\n        }\n        if (inFile.exists()) {\n            try (PrintWriter pw = new PrintWriter(new FileWriter(\"censor.out\"))) {\n                pw.println(sb.toString());\n            }\n        } else {\n            System.out.println(sb.toString());\n        }\n    }\n}\n"
+    }
+  },
+  "starterCode": {
+    "python": "import sys\n\ndef solve():\n    # Tip: Both stdin/stdout and censor.in / censor.out are supported!\n    tokens = sys.stdin.read().split()\n    if len(tokens) < 2:\n        return\n    s, t = tokens[0], tokens[1]\n    \n    # Build the censored result using a character stack in O(|S| * |T|)\n    print(s)\n\nif __name__ == \"__main__\":\n    solve()\n",
+    "cpp": "#include <iostream>\n#include <string>\nusing namespace std;\n\nint main() {\n    ios::sync_with_stdio(false);\n    cin.tie(nullptr);\n    // Tip: Both cin/cout and censor.in / censor.out are supported!\n    string s, t;\n    if (!(cin >> s >> t)) return 0;\n    \n    // Build the censored result string R one char at a time\n    cout << s << '\\n';\n    return 0;\n}\n",
+    "java": "import java.io.*;\n\npublic class Main {\n    public static void main(String[] args) throws Exception {\n        // Tip: Both System.in/out and censor.in / censor.out are supported!\n        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));\n        String s = br.readLine();\n        if (s == null) return;\n        String t = br.readLine().trim();\n        s = s.trim();\n        \n        // Build the censored result using a StringBuilder\n        System.out.println(s);\n    }\n}\n"
+  }
+}

@@ -76,7 +76,7 @@ export default function Header({
                 : 'Problem List'}
             </span>
             <span className="solved-counter-chip">
-              {solvedCount}/{problems.length || 15}
+              {solvedCount}/{problems.length || 17}
             </span>
           </button>
 
